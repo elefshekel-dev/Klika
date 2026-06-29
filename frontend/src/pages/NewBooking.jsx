@@ -36,9 +36,7 @@ export default function NewBooking() {
   const [form, setForm] = useState({
     room_id: '',
     booker_name: user?.name || '',
-    booker_company: '',
     purpose: '',
-    participants: '',
     date: '',
     start_time: '',
     end_time: '',
@@ -67,9 +65,9 @@ export default function NewBooking() {
     try {
       await createBooking({
         room_id: Number(form.room_id),
-        booker_name: `${form.booker_name} / ${form.booker_company}`,
-        purpose: form.purpose,
-        participants: Number(form.participants),
+        booker_name: form.booker_name,
+        purpose: form.purpose || '—',
+        participants: 1,
         date: form.date,
         start_time: form.start_time,
         end_time: form.end_time,
@@ -78,9 +76,7 @@ export default function NewBooking() {
       setForm({
         room_id: '',
         booker_name: user?.name || '',
-        booker_company: '',
         purpose: '',
-        participants: '',
         date: '',
         start_time: '',
         end_time: '',
@@ -100,8 +96,8 @@ export default function NewBooking() {
       <div className="page">
         <div className="success-card">
           <div className="success-icon">✓</div>
-          <h2>ההזמנה נשלחה בהצלחה!</h2>
-          <p>בקשתך נשלחה לאישור המנהל. תוכל לעקוב אחרי הסטטוס בעמוד ההזמנות שלי.</p>
+          <h2>ההזמנה נרשמה בהצלחה!</h2>
+          <p>ההזמנה אושרה אוטומטית. ההנהלה שומרת לעצמה את הזכות לערוך שינויים.</p>
           <div className="success-actions">
             <Link to="/my-bookings" className="btn btn-primary">ההזמנות שלי</Link>
             <button onClick={() => setSuccess(false)} className="btn btn-outline">הזמנה נוספת</button>
@@ -125,16 +121,14 @@ export default function NewBooking() {
               <select id="room_id" name="room_id" value={form.room_id} onChange={handleChange} required>
                 <option value="">בחר חדר...</option>
                 {rooms.map(r => (
-                  <option key={r.id} value={r.id}>
-                    {r.name} (תפוסה: {r.capacity})
-                  </option>
+                  <option key={r.id} value={r.id}>{r.name}</option>
                 ))}
               </select>
               {selectedRoom && <p className="field-hint">{selectedRoom.description}</p>}
             </div>
 
             <div className="form-group">
-              <label htmlFor="booker_name">שם המזמין *</label>
+              <label htmlFor="booker_name">מזמין/ה *</label>
               <input
                 id="booker_name"
                 name="booker_name"
@@ -147,44 +141,13 @@ export default function NewBooking() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="booker_company">שם החברה/ארגון *</label>
-              <input
-                id="booker_company"
-                name="booker_company"
-                type="text"
-                value={form.booker_company}
-                onChange={handleChange}
-                placeholder="לדוגמה: קליקה, סיראז'"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="purpose">מטרת הפגישה *</label>
-              <select id="purpose" name="purpose" value={form.purpose} onChange={handleChange} required>
-                <option value="">בחר מטרה...</option>
+              <label htmlFor="purpose">מטרת הפגישה</label>
+              <select id="purpose" name="purpose" value={form.purpose} onChange={handleChange}>
+                <option value="">ללא ציון מטרה</option>
                 {PURPOSE_OPTIONS.map(opt => (
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="participants">מספר משתתפים *</label>
-              <input
-                id="participants"
-                name="participants"
-                type="number"
-                value={form.participants}
-                onChange={handleChange}
-                min="1"
-                max={selectedRoom?.capacity || 999}
-                placeholder="כמה משתתפים?"
-                required
-              />
-              {selectedRoom && (
-                <p className="field-hint">תפוסה מקסימלית: {selectedRoom.capacity} אנשים</p>
-              )}
             </div>
 
             <div className="form-group">
@@ -232,7 +195,7 @@ export default function NewBooking() {
 
           <div className="form-actions">
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'שולח...' : 'שלח בקשת הזמנה'}
+              {loading ? 'שולח...' : 'שריין חדר'}
             </button>
             <Link to="/dashboard" className="btn btn-outline">ביטול</Link>
           </div>

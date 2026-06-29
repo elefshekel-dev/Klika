@@ -46,9 +46,11 @@ router.get('/', (req, res) => {
 router.post('/', (req, res) => {
   const { room_id, booker_name, purpose, participants, date, start_time, end_time } = req.body;
 
-  if (!room_id || !booker_name || !purpose || !participants || !date || !start_time || !end_time) {
+  if (!room_id || !booker_name || !date || !start_time || !end_time) {
     return res.status(400).json({ error: 'כל השדות נדרשים' });
   }
+  const resolvedPurpose = purpose || '—';
+  const resolvedParticipants = participants || 1;
 
   const validateHours = req.app.get('validateOperatingHours');
   const hoursError = validateHours(date, start_time, end_time);
@@ -59,7 +61,7 @@ router.post('/', (req, res) => {
   const room = db.prepare('SELECT * FROM rooms WHERE id = ?').get(room_id);
   if (!room) return res.status(400).json({ error: 'חדר לא נמצא' });
 
-  if (participants > room.capacity) {
+  if (resolvedParticipants > room.capacity) {
     return res.status(400).json({ error: `מספר המשתתפים חורג מהתפוסה המקסימלית (${room.capacity})` });
   }
 
@@ -76,7 +78,7 @@ router.post('/', (req, res) => {
   const result = db.prepare(`
     INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'approved')
-  `).run(room_id, req.user.id, booker_name, purpose, participants, date, start_time, end_time);
+  `).run(room_id, req.user.id, booker_name, resolvedPurpose, resolvedParticipants, date, start_time, end_time);
 
   const booking = db.prepare(`
     SELECT b.*, r.name as room_name FROM bookings b
