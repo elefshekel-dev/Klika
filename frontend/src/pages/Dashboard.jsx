@@ -10,6 +10,7 @@ const ROOM_COLORS = {
 };
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+const rooms = ['אולם סדנאות', 'חדר ישיבות', 'משרד פרטי'];
 
 function getMonthDates(baseDate) {
   const year = baseDate.getFullYear();
@@ -24,10 +25,10 @@ function getMonthDates(baseDate) {
   endDate.setDate(lastDay.getDate() + (6 - lastDay.getDay()));
 
   const days = [];
-  const current = new Date(startDate);
-  while (current <= endDate) {
-    days.push(new Date(current));
-    current.setDate(current.getDate() + 1);
+  const cur = new Date(startDate);
+  while (cur <= endDate) {
+    days.push(new Date(cur));
+    cur.setDate(cur.getDate() + 1);
   }
   return days;
 }
@@ -39,8 +40,6 @@ function formatDate(date) {
 function formatMonthLabel(date) {
   return date.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
 }
-
-const rooms = ['אולם סדנאות', 'חדר ישיבות', 'משרד פרטי'];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -103,59 +102,47 @@ export default function Dashboard() {
         <table className="calendar-table month-table">
           <thead>
             <tr>
-              <th className="room-col">חדר</th>
               {DAY_NAMES.map((name, i) => (
                 <th key={i} className={i === 6 ? 'sat-col' : ''}>{name}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {weeks.map((week, wi) =>
-              rooms.map((room, ri) => (
-                <tr key={`${wi}-${ri}`}>
-                  <td className="room-name-cell">
-                    {ri === 0 && (
-                      <div className="week-range">
-                        {week[0].toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' })}
+            {weeks.map((week, wi) => (
+              <tr key={wi}>
+                {week.map((day, di) => {
+                  const isSat = day.getDay() === 6;
+                  const isOtherMonth = day.getMonth() !== currentMonth;
+                  const isToday = formatDate(day) === todayStr;
+                  return (
+                    <td key={di} className={[
+                      'calendar-cell month-cell',
+                      isSat ? 'sat-day' : '',
+                      isOtherMonth ? 'other-month' : '',
+                      isToday ? 'today-cell' : '',
+                    ].join(' ')}>
+                      <div className={`day-number${isToday ? ' today-number' : ''}`}>
+                        {day.getDate()}
                       </div>
-                    )}
-                    <span className="room-dot" style={{ background: ROOM_COLORS[room] }}></span>
-                    <span className="room-label">{room}</span>
-                  </td>
-                  {week.map((day, di) => {
-                    const isSat = day.getDay() === 6;
-                    const isOtherMonth = day.getMonth() !== currentMonth;
-                    const isToday = formatDate(day) === todayStr;
-                    const dayBookings = getBookingsForDayAndRoom(day, room);
-                    return (
-                      <td key={di} className={[
-                        'calendar-cell',
-                        isSat ? 'sat-day' : '',
-                        isOtherMonth ? 'other-month' : '',
-                        isToday ? 'today-cell' : '',
-                      ].join(' ')}>
-                        {ri === 0 && (
-                          <div className={`day-number${isToday ? ' today-number' : ''}`}>
-                            {day.getDate()}
-                          </div>
-                        )}
-                        {isSat ? null : dayBookings.map(b => (
+                      {!isSat && rooms.map(room => {
+                        const dayBookings = getBookingsForDayAndRoom(day, room);
+                        return dayBookings.map(b => (
                           <div
                             key={b.id}
                             className="booking-chip"
                             style={{ background: ROOM_COLORS[room] }}
-                            title={`${b.booker_name} - ${b.purpose} (${b.start_time}-${b.end_time})`}
+                            title={`${room} | ${b.booker_name} - ${b.purpose} (${b.start_time}-${b.end_time})`}
                           >
-                            <span>{b.start_time}-{b.end_time}</span>
-                            <span className="chip-purpose">{b.purpose}</span>
+                            <span className="chip-room-dot" style={{ background: 'rgba(255,255,255,0.5)' }}></span>
+                            <span>{b.start_time} {b.purpose}</span>
                           </div>
-                        ))}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))
-            )}
+                        ));
+                      })}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
