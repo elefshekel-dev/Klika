@@ -10,7 +10,7 @@ function validateHoursClient(date, startTime, endTime) {
   const d = new Date(date + 'T00:00:00');
   const day = d.getDay();
 
-  if (day === 5 || day === 6) return 'אין הזמנות בשישי ושבת';
+  if (day === 6) return 'אין הזמנות בשבת';
 
   const [sh, sm] = startTime.split(':').map(Number);
   const [eh, em] = endTime.split(':').map(Number);
@@ -20,10 +20,12 @@ function validateHoursClient(date, startTime, endTime) {
   if (end <= start) return 'שעת הסיום חייבת להיות אחרי שעת ההתחלה';
 
   const open = 8 * 60;
-  const close = 22 * 60;
+  const close = day === 5 ? 14 * 60 : 20 * 60;
 
   if (start < open || end > close) {
-    return 'שעות הפעילות הן 08:00-22:00 (ראשון-חמישי)';
+    return day === 5
+      ? 'ביום שישי שעות הפעילות הן 08:00-14:00'
+      : 'שעות הפעילות הן 08:00-20:00 (ראשון-חמישי)';
   }
   return null;
 }
@@ -196,7 +198,7 @@ export default function NewBooking() {
                 min={today}
                 required
               />
-              <p className="field-hint">ראשון-חמישי 08:00-22:00 | שישי ושבת סגור</p>
+              <p className="field-hint">ראשון-חמישי 08:00-20:00 | שישי 08:00-14:00 | שבת סגור</p>
             </div>
 
             <div className="form-group form-row">

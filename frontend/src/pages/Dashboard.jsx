@@ -104,7 +104,7 @@ export default function Dashboard() {
           <thead>
             <tr>
               {DAY_NAMES.map((name, i) => (
-                <th key={i} className={i >= 5 ? 'sat-col' : ''}>{name}</th>
+                <th key={i} className={i === 6 ? 'sat-col' : ''}>{name}</th>
               ))}
             </tr>
           </thead>
@@ -112,7 +112,7 @@ export default function Dashboard() {
             {weeks.map((week, wi) => (
               <tr key={wi}>
                 {week.map((day, di) => {
-                  const isSat = day.getDay() === 5 || day.getDay() === 6;
+                  const isSat = day.getDay() === 6;
                   const isOtherMonth = day.getMonth() !== currentMonth;
                   const isToday = formatDate(day) === todayStr;
                   return (

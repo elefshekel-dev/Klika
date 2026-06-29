@@ -76,7 +76,7 @@ function seedLunchBreaks() {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     const dow = d.getDay();
-    if (dow === 5 || dow === 6) continue; // ראשון-חמישי בלבד (5=שישי, 6=שבת)
+    if (dow === 5 || dow === 6) continue; // רק ראשון-חמישי
 
     const dateStr = d.toISOString().split('T')[0];
     const exists = db.prepare(
