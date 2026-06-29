@@ -6,7 +6,10 @@ const app = express();
 const PORT = 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'room-booking-secret-key-2024';
 
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:5173'];
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
 // JWT middleware
