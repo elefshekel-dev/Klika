@@ -71,11 +71,10 @@ function seedLunchBreaks() {
   const admin = db.prepare("SELECT id FROM users WHERE username = 'admin'").get();
   if (!room || !admin) return;
 
-  // Remove any existing Friday lunch breaks (cleanup from previous seed)
+  // Remove ALL existing lunch breaks and re-seed cleanly
   db.prepare(`
     DELETE FROM bookings
     WHERE room_id=? AND purpose='הפסקת אוכל' AND start_time='12:00' AND end_time='13:00'
-    AND (CAST(strftime('%w', date) AS INTEGER) = 5)
   `).run(room.id);
 
   const today = new Date();
@@ -89,7 +88,7 @@ function seedLunchBreaks() {
     const exists = db.prepare(
       "SELECT id FROM bookings WHERE room_id=? AND date=? AND start_time='12:00' AND end_time='13:00'"
     ).get(room.id, dateStr);
-    if (exists) continue;
+    if (exists) continue; // shouldn't happen after full delete above, but safety check
 
     db.prepare(`
       INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status, notes)
