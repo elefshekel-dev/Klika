@@ -92,7 +92,7 @@ export default function MyBookings() {
           <thead>
             <tr>
               {DAY_NAMES.map((name, i) => (
-                <th key={i} className={i === 6 ? 'sat-col' : ''}>{name}</th>
+                <th key={i} className={i >= 5 ? 'sat-col' : ''}>{name}</th>
               ))}
             </tr>
           </thead>
@@ -100,7 +100,7 @@ export default function MyBookings() {
             {weeks.map((week, wi) => (
               <tr key={wi}>
                 {week.map((day, di) => {
-                  const isSat = day.getDay() === 6;
+                  const isSat = day.getDay() === 5 || day.getDay() === 6;
                   const isOtherMonth = day.getMonth() !== currentMonth;
                   const isToday = formatDate(day) === todayStr;
                   const dayBookings = getBookingsForDay(day);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getBookings, updateBookingStatus, getRooms } from '../api';
+import { getBookings, updateBookingStatus, getRooms, deleteBooking } from '../api';
 import api from '../api';
 
 const PURPOSE_OPTIONS = ['ישיבה', 'שעת קהילה', 'הרצאה/סדנה', 'הפסקת אוכל'];
@@ -51,6 +51,16 @@ export default function AdminPanel() {
       setBookings(bs => bs.filter(b => b.id !== rejectModal));
       setRejectModal(null);
     } catch (err) { setError(err.response?.data?.error || 'שגיאה'); }
+    finally { setActionLoading(null); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('למחוק את ההזמנה לצמיתות?')) return;
+    setActionLoading(id + '-delete');
+    try {
+      await deleteBooking(id);
+      setBookings(bs => bs.filter(b => b.id !== id));
+    } catch (err) { setError(err.response?.data?.error || 'שגיאה במחיקה'); }
     finally { setActionLoading(null); }
   };
 
@@ -143,10 +153,11 @@ export default function AdminPanel() {
                   <td>
                     <div className="action-buttons">
                       <button className="btn btn-outline btn-sm" onClick={() => openEditModal(b)}>ערוך</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(b.id)} disabled={!!actionLoading}>מחק</button>
                       {b.status === 'pending' && (
                         <>
                           <button className="btn btn-success btn-sm" onClick={() => handleApprove(b.id)} disabled={!!actionLoading}>אשר</button>
-                          <button className="btn btn-danger btn-sm" onClick={() => openRejectModal(b.id)} disabled={!!actionLoading}>דחה</button>
+                          <button className="btn btn-outline btn-sm" onClick={() => openRejectModal(b.id)} disabled={!!actionLoading}>דחה</button>
                         </>
                       )}
                     </div>

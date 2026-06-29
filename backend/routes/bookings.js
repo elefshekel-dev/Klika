@@ -176,7 +176,7 @@ router.delete('/:id', (req, res) => {
   }
 
   db.prepare('DELETE FROM bookings WHERE id = ?').run(req.params.id);
-  res.json({ message: 'הזמנה בוטלה בהצלחה' });
+  res.json({ message: 'הזמנה נמחקה בהצלחה' });
 });
 
 module.exports = router;

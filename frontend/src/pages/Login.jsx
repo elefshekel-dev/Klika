@@ -63,8 +63,7 @@ export default function Login() {
           </button>
         </form>
         <div className="login-hint">
-          <p><strong>מנהל:</strong> admin / admin123</p>
-          <p><strong>עובד:</strong> employee1 / pass123</p>
+          <p>מערכת לשריון חדרים בקליקה. כל הזמנה מתקבלת באופן אוטומטי, ההנהלה שומרת לעצמה את הזכות לערוך שינויים.</p>
         </div>
       </div>
     </div>

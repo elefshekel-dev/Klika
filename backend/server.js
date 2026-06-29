@@ -44,8 +44,8 @@ function validateOperatingHours(date, startTime, endTime) {
   const d = new Date(date + 'T00:00:00');
   const dayOfWeek = d.getDay(); // 0=Sun, 6=Sat
 
-  if (dayOfWeek === 6) {
-    return 'אין הזמנות בשבת';
+  if (dayOfWeek === 5 || dayOfWeek === 6) {
+    return 'אין הזמנות בשישי ושבת';
   }
 
   const [startH, startM] = startTime.split(':').map(Number);
@@ -57,21 +57,10 @@ function validateOperatingHours(date, startTime, endTime) {
     return 'שעת הסיום חייבת להיות אחרי שעת ההתחלה';
   }
 
-  const openMinutes = 8 * 60; // 08:00
-  let closeMinutes;
-
-  if (dayOfWeek === 5) {
-    // Friday
-    closeMinutes = 14 * 60; // 14:00
-  } else {
-    // Sun-Thu
-    closeMinutes = 22 * 60; // 22:00
-  }
+  const openMinutes = 8 * 60;
+  const closeMinutes = 22 * 60;
 
   if (startMinutes < openMinutes || endMinutes > closeMinutes) {
-    if (dayOfWeek === 5) {
-      return 'ביום שישי שעות הפעילות הן 08:00-14:00';
-    }
     return 'שעות הפעילות הן 08:00-22:00 (ראשון-חמישי)';
   }
 
