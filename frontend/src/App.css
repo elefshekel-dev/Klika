@@ -192,6 +192,9 @@ body {
 }
 .login-hint p { margin: 0.1rem 0; }
 
+/* Login subtitle */
+.login-subtitle { color: var(--gray-500); font-size: 0.8rem; margin-top: 0.1rem; }
+
 /* Calendar */
 .calendar-nav {
   display: flex;
@@ -231,6 +234,18 @@ body {
 }
 .closed-day { background: var(--gray-50); }
 .closed-label { color: var(--gray-500); font-size: 0.75rem; }
+
+/* Month calendar */
+.month-table { font-size: 0.8rem; }
+.sat-col { background: #dbeafe !important; color: #1e40af; }
+.sat-day { background: #eff6ff; }
+.other-month { opacity: 0.35; }
+.today-cell { background: #fefce8; }
+.day-number { font-size: 0.75rem; color: var(--gray-500); margin-bottom: 2px; font-weight: 500; }
+.today-number { color: var(--primary); font-weight: 700; }
+.week-range { font-size: 0.7rem; color: var(--gray-400); margin-bottom: 4px; }
+.room-label { font-size: 0.78rem; }
+.room-name-cell { min-width: 130px; }
 .room-name-cell {
   padding: 0.5rem 0.75rem;
   font-size: 0.85rem;

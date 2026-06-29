@@ -22,7 +22,7 @@ function NavBar() {
     <nav className="navbar">
       <div className="navbar-brand">
         <span className="navbar-logo">🏢</span>
-        <span className="navbar-title">מערכת הזמנת חדרים</span>
+        <span className="navbar-title">Klika Rooms</span>
       </div>
       <div className="navbar-links">
         <Link to="/dashboard">לוח מחוונים</Link>

@@ -50,17 +50,17 @@ db.exec(`
 const roomCount = db.prepare('SELECT COUNT(*) as c FROM rooms').get();
 if (roomCount.c === 0) {
   const insertRoom = db.prepare('INSERT INTO rooms (name, capacity, description) VALUES (?, ?, ?)');
-  insertRoom.run('אולם סדנאות', 30, 'חלל גדול עם ציוד מולטימדיה');
-  insertRoom.run('חדר ישיבות', 12, 'חדר עם לוח ומסך');
-  insertRoom.run('משרד קטן', 4, 'חדר שקט לפגישות קטנות');
+  insertRoom.run('אולם סדנאות', 60, 'חלל גדול עם ציוד מולטימדיה');
+  insertRoom.run('חדר ישיבות', 15, 'חדר עם לוח ומסך');
+  insertRoom.run('משרד פרטי', 4, 'חדר שקט לפגישות קטנות');
 }
 
 // Seed users if empty
 const userCount = db.prepare('SELECT COUNT(*) as c FROM users').get();
 if (userCount.c === 0) {
   const insertUser = db.prepare('INSERT INTO users (username, password_hash, role, name) VALUES (?, ?, ?, ?)');
-  const managerHash = bcrypt.hashSync('admin123', 10);
-  const employeeHash = bcrypt.hashSync('pass123', 10);
+  const managerHash = bcrypt.hashSync('Klika@Admin2024!', 10);
+  const employeeHash = bcrypt.hashSync('Klika@User2024!', 10);
   insertUser.run('admin', managerHash, 'manager', 'מנהל המערכת');
   insertUser.run('employee1', employeeHash, 'employee', 'ישראל ישראלי');
 }

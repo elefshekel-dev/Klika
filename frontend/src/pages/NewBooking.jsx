@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { getRooms, createBooking } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 
+const PURPOSE_OPTIONS = ['ישיבה', 'שעת קהילה', 'הרצאה/סדנה'];
+
 function validateHoursClient(date, startTime, endTime) {
   if (!date || !startTime || !endTime) return null;
   const d = new Date(date + 'T00:00:00');
@@ -34,6 +36,7 @@ export default function NewBooking() {
   const [form, setForm] = useState({
     room_id: '',
     booker_name: user?.name || '',
+    booker_company: '',
     purpose: '',
     participants: '',
     date: '',
@@ -58,22 +61,24 @@ export default function NewBooking() {
     setError('');
 
     const hoursError = validateHoursClient(form.date, form.start_time, form.end_time);
-    if (hoursError) {
-      setError(hoursError);
-      return;
-    }
+    if (hoursError) { setError(hoursError); return; }
 
     setLoading(true);
     try {
       await createBooking({
-        ...form,
         room_id: Number(form.room_id),
+        booker_name: `${form.booker_name} / ${form.booker_company}`,
+        purpose: form.purpose,
         participants: Number(form.participants),
+        date: form.date,
+        start_time: form.start_time,
+        end_time: form.end_time,
       });
       setSuccess(true);
       setForm({
         room_id: '',
         booker_name: user?.name || '',
+        booker_company: '',
         purpose: '',
         participants: '',
         date: '',
@@ -88,8 +93,6 @@ export default function NewBooking() {
   };
 
   const selectedRoom = rooms.find(r => r.id === Number(form.room_id));
-
-  // Min date = today
   const today = new Date().toISOString().split('T')[0];
 
   if (success) {
@@ -127,9 +130,7 @@ export default function NewBooking() {
                   </option>
                 ))}
               </select>
-              {selectedRoom && (
-                <p className="field-hint">{selectedRoom.description}</p>
-              )}
+              {selectedRoom && <p className="field-hint">{selectedRoom.description}</p>}
             </div>
 
             <div className="form-group">
@@ -146,16 +147,26 @@ export default function NewBooking() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="purpose">מטרת הפגישה *</label>
+              <label htmlFor="booker_company">שם החברה/ארגון *</label>
               <input
-                id="purpose"
-                name="purpose"
+                id="booker_company"
+                name="booker_company"
                 type="text"
-                value={form.purpose}
+                value={form.booker_company}
                 onChange={handleChange}
-                placeholder="תאר את מטרת הפגישה"
+                placeholder="לדוגמה: קליקה, סיראז'"
                 required
               />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="purpose">מטרת הפגישה *</label>
+              <select id="purpose" name="purpose" value={form.purpose} onChange={handleChange} required>
+                <option value="">בחר מטרה...</option>
+                {PURPOSE_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">

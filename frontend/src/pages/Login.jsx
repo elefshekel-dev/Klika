@@ -29,7 +29,8 @@ export default function Login() {
       <div className="login-card">
         <div className="login-header">
           <span className="login-logo">🏢</span>
-          <h1>מערכת הזמנת חדרים</h1>
+          <h1>Klika Rooms</h1>
+          <p className="login-subtitle">שריון חדרים בהאב</p>
           <p>התחבר כדי להמשיך</p>
         </div>
         <form onSubmit={handleSubmit} className="login-form">
