@@ -377,6 +377,11 @@ body {
 }
 .modal textarea:focus { outline: none; border-color: var(--primary); }
 .modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+.modal-wide { max-width: 600px; }
+.edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.edit-grid .form-group input,
+.edit-grid .form-group select { padding: 0.4rem 0.6rem; border: 1px solid var(--gray-200); border-radius: var(--radius); font-size: 0.875rem; width: 100%; direction: rtl; }
+.edit-grid .form-group label { font-size: 0.8rem; font-weight: 500; color: var(--gray-700); display: block; margin-bottom: 3px; }
 
 /* Success card */
 .success-card {

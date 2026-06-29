@@ -42,7 +42,7 @@ router.get('/', (req, res) => {
   res.json(bookings);
 });
 
-// POST /api/bookings
+// POST /api/bookings — auto-approved
 router.post('/', (req, res) => {
   const { room_id, booker_name, purpose, participants, date, start_time, end_time } = req.body;
 
@@ -56,18 +56,13 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: hoursError });
   }
 
-  // Check room exists
   const room = db.prepare('SELECT * FROM rooms WHERE id = ?').get(room_id);
-  if (!room) {
-    return res.status(400).json({ error: 'חדר לא נמצא' });
-  }
+  if (!room) return res.status(400).json({ error: 'חדר לא נמצא' });
 
-  // Check participant capacity
   if (participants > room.capacity) {
     return res.status(400).json({ error: `מספר המשתתפים חורג מהתפוסה המקסימלית (${room.capacity})` });
   }
 
-  // Check for conflicts (approved or pending bookings in same room on same date)
   const conflicts = db.prepare(`
     SELECT * FROM bookings
     WHERE room_id = ? AND date = ? AND status != 'rejected'
@@ -79,8 +74,8 @@ router.post('/', (req, res) => {
   }
 
   const result = db.prepare(`
-    INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'approved')
   `).run(room_id, req.user.id, booker_name, purpose, participants, date, start_time, end_time);
 
   const booking = db.prepare(`
@@ -90,6 +85,61 @@ router.post('/', (req, res) => {
   `).get(result.lastInsertRowid);
 
   res.status(201).json(booking);
+});
+
+// PATCH /api/bookings/:id — manager edit booking details
+router.patch('/:id', (req, res) => {
+  const requireManager = req.app.get('requireManager');
+  requireManager(req, res, () => {
+    const { room_id, booker_name, purpose, participants, date, start_time, end_time, notes } = req.body;
+
+    const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+    if (!booking) return res.status(404).json({ error: 'הזמנה לא נמצאה' });
+
+    const newRoomId = room_id || booking.room_id;
+    const newDate = date || booking.date;
+    const newStart = start_time || booking.start_time;
+    const newEnd = end_time || booking.end_time;
+    const newParticipants = participants || booking.participants;
+
+    const room = db.prepare('SELECT * FROM rooms WHERE id = ?').get(newRoomId);
+    if (!room) return res.status(400).json({ error: 'חדר לא נמצא' });
+
+    if (newParticipants > room.capacity) {
+      return res.status(400).json({ error: `מספר המשתתפים חורג מהתפוסה המקסימלית (${room.capacity})` });
+    }
+
+    const conflicts = db.prepare(`
+      SELECT * FROM bookings
+      WHERE room_id = ? AND date = ? AND status != 'rejected' AND id != ?
+      AND NOT (end_time <= ? OR start_time >= ?)
+    `).all(newRoomId, newDate, req.params.id, newStart, newEnd);
+
+    if (conflicts.length > 0) {
+      return res.status(409).json({ error: 'החדר תפוס בשעות אלו' });
+    }
+
+    db.prepare(`
+      UPDATE bookings SET room_id=?, booker_name=?, purpose=?, participants=?,
+        date=?, start_time=?, end_time=?, notes=?
+      WHERE id=?
+    `).run(
+      newRoomId,
+      booker_name || booking.booker_name,
+      purpose || booking.purpose,
+      newParticipants,
+      newDate, newStart, newEnd,
+      notes !== undefined ? notes : booking.notes,
+      req.params.id
+    );
+
+    const updated = db.prepare(`
+      SELECT b.*, r.name as room_name FROM bookings b
+      JOIN rooms r ON b.room_id = r.id WHERE b.id = ?
+    `).get(req.params.id);
+
+    res.json(updated);
+  });
 });
 
 // PATCH /api/bookings/:id/status
@@ -102,17 +152,14 @@ router.patch('/:id/status', (req, res) => {
     }
 
     const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
-    if (!booking) {
-      return res.status(404).json({ error: 'הזמנה לא נמצאה' });
-    }
+    if (!booking) return res.status(404).json({ error: 'הזמנה לא נמצאה' });
 
     db.prepare('UPDATE bookings SET status = ?, notes = ? WHERE id = ?')
       .run(status, notes || null, req.params.id);
 
     const updated = db.prepare(`
       SELECT b.*, r.name as room_name FROM bookings b
-      JOIN rooms r ON b.room_id = r.id
-      WHERE b.id = ?
+      JOIN rooms r ON b.room_id = r.id WHERE b.id = ?
     `).get(req.params.id);
 
     res.json(updated);
@@ -122,16 +169,10 @@ router.patch('/:id/status', (req, res) => {
 // DELETE /api/bookings/:id
 router.delete('/:id', (req, res) => {
   const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
-  if (!booking) {
-    return res.status(404).json({ error: 'הזמנה לא נמצאה' });
-  }
+  if (!booking) return res.status(404).json({ error: 'הזמנה לא נמצאה' });
 
   if (booking.user_id !== req.user.id && req.user.role !== 'manager') {
     return res.status(403).json({ error: 'אין הרשאה לבטל הזמנה זו' });
-  }
-
-  if (booking.status !== 'pending') {
-    return res.status(400).json({ error: 'ניתן לבטל רק הזמנות ממתינות' });
   }
 
   db.prepare('DELETE FROM bookings WHERE id = ?').run(req.params.id);

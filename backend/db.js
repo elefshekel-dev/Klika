@@ -65,4 +65,31 @@ if (userCount.c === 0) {
   insertUser.run('employee1', employeeHash, 'employee', 'ישראל ישראלי');
 }
 
+// Seed lunch break bookings for weekdays (rolling 90 days)
+function seedLunchBreaks() {
+  const room = db.prepare("SELECT id FROM rooms WHERE name = 'חדר ישיבות'").get();
+  const admin = db.prepare("SELECT id FROM users WHERE username = 'admin'").get();
+  if (!room || !admin) return;
+
+  const today = new Date();
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dow = d.getDay();
+    if (dow === 5 || dow === 6) continue; // skip Fri, Sat
+
+    const dateStr = d.toISOString().split('T')[0];
+    const exists = db.prepare(
+      "SELECT id FROM bookings WHERE room_id=? AND date=? AND start_time='12:00' AND end_time='13:00'"
+    ).get(room.id, dateStr);
+    if (exists) continue;
+
+    db.prepare(`
+      INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status, notes)
+      VALUES (?, ?, 'קליקה', 'הפסקת אוכל', 15, ?, '12:00', '13:00', 'approved', 'שמור להפסקות אוכל')
+    `).run(room.id, admin.id, dateStr);
+  }
+}
+seedLunchBreaks();
+
 module.exports = db;
