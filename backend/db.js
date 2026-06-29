@@ -71,6 +71,13 @@ function seedLunchBreaks() {
   const admin = db.prepare("SELECT id FROM users WHERE username = 'admin'").get();
   if (!room || !admin) return;
 
+  // Remove any existing Friday lunch breaks (cleanup from previous seed)
+  db.prepare(`
+    DELETE FROM bookings
+    WHERE room_id=? AND purpose='הפסקת אוכל' AND start_time='12:00' AND end_time='13:00'
+    AND (CAST(strftime('%w', date) AS INTEGER) = 5)
+  `).run(room.id);
+
   const today = new Date();
   for (let i = 0; i < 90; i++) {
     const d = new Date(today);
