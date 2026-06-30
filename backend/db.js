@@ -65,7 +65,28 @@ if (userCount.c === 0) {
   insertUser.run('employee1', employeeHash, 'employee', 'ישראל ישראלי');
 }
 
-// Remove all lunch break bookings
-db.prepare(`DELETE FROM bookings WHERE purpose='הפסקת אוכל' AND start_time='12:00' AND end_time='13:00'`).run();
+// Seed lunch break bookings Sun-Thu 12:30-13:30 (rolling 90 days)
+function seedLunchBreaks() {
+  const room = db.prepare("SELECT id FROM rooms WHERE name = 'חדר ישיבות'").get();
+  const admin = db.prepare("SELECT id FROM users WHERE username = 'admin'").get();
+  if (!room || !admin) return;
+
+  db.prepare(`DELETE FROM bookings WHERE purpose='הפסקת צהריים' AND start_time='12:30' AND end_time='13:30'`).run();
+
+  const today = new Date();
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dow = d.getDay();
+    if (dow === 5 || dow === 6) continue;
+
+    const dateStr = d.toISOString().split('T')[0];
+    db.prepare(`
+      INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status, notes)
+      VALUES (?, ?, 'קליקה', 'הפסקת צהריים', 15, ?, '12:30', '13:30', 'approved', 'שמור להפסקת צהריים')
+    `).run(room.id, admin.id, dateStr);
+  }
+}
+seedLunchBreaks();
 
 module.exports = db;
