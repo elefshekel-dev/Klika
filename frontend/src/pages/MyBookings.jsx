@@ -29,7 +29,9 @@ function getMonthDates(baseDate) {
   return days;
 }
 
-function formatDate(date) { return date.toISOString().split('T')[0]; }
+function formatDate(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
 function formatMonthLabel(date) { return date.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' }); }
 
 export default function MyBookings() {
