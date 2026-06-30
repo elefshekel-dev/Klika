@@ -80,7 +80,7 @@ function seedLunchBreaks() {
     const dow = d.getDay();
     if (dow === 5 || dow === 6) continue;
 
-    const dateStr = d.toISOString().split('T')[0];
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     db.prepare(`
       INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status, notes)
       VALUES (?, ?, 'קליקה', 'הפסקת צהריים', 15, ?, '12:30', '13:30', 'approved', 'שמור להפסקת צהריים')
