@@ -48,6 +48,7 @@ export default function Dashboard() {
   const [pendingCount, setPendingCount] = useState(0);
   const [monthBase, setMonthBase] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -131,7 +132,8 @@ export default function Dashboard() {
                           <div
                             key={b.id}
                             className="booking-chip"
-                            style={{ background: ROOM_COLORS[room] }}
+                            style={{ background: ROOM_COLORS[room], cursor: 'pointer' }}
+                            onClick={() => setSelectedBooking({ ...b, room_name: room })}
                             title={`${room} | ${b.booker_name} - ${b.purpose} (${b.start_time}-${b.end_time})`}
                           >
                             <span className="chip-room-dot" style={{ background: 'rgba(255,255,255,0.5)' }}></span>
@@ -156,6 +158,23 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {selectedBooking && (
+        <div className="modal-overlay" onClick={() => setSelectedBooking(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>{selectedBooking.room_name}</h3>
+            <div className="booking-detail">
+              <p><strong>מזמין/ה:</strong> {selectedBooking.booker_name}</p>
+              <p><strong>שעות:</strong> {selectedBooking.start_time}–{selectedBooking.end_time}</p>
+              <p><strong>תאריך:</strong> {new Date(selectedBooking.date + 'T00:00:00').toLocaleDateString('he-IL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              {selectedBooking.purpose && selectedBooking.purpose !== '—' && <p><strong>מטרה:</strong> {selectedBooking.purpose}</p>}
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={() => setSelectedBooking(null)}>סגור</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
