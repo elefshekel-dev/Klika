@@ -89,4 +89,27 @@ function seedLunchBreaks() {
 }
 seedLunchBreaks();
 
+// Block אולם סדנאות for סיראז' from 2026-07-01 to 2026-08-31
+function seedSirajBlock() {
+  const room = db.prepare("SELECT id FROM rooms WHERE name = 'אולם סדנאות'").get();
+  const admin = db.prepare("SELECT id FROM users WHERE username = 'admin'").get();
+  if (!room || !admin) return;
+
+  db.prepare(`DELETE FROM bookings WHERE booker_name='סיראז׳' AND room_id=?`).run(room.id);
+
+  const start = new Date('2026-07-01');
+  const end = new Date('2026-08-31');
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const dow = d.getDay();
+    if (dow === 6) continue; // שבת סגור
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const endTime = dow === 5 ? '14:00' : '20:00';
+    db.prepare(`
+      INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status, notes)
+      VALUES (?, ?, 'סיראז׳', 'סיראז׳', 60, ?, '08:00', ?, 'approved', 'חסום לסיראז׳')
+    `).run(room.id, admin.id, dateStr, endTime);
+  }
+}
+seedSirajBlock();
+
 module.exports = db;
