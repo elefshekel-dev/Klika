@@ -71,6 +71,14 @@ function validateOperatingHours(date, startTime, endTime) {
 
 app.set('validateOperatingHours', validateOperatingHours);
 
+// Health check (used by uptime monitor to keep the free instance awake)
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
+app.get('/', (req, res) => {
+  res.send('Klika Rooms API');
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/rooms', require('./routes/rooms'));
