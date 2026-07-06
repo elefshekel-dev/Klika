@@ -86,13 +86,20 @@ db.init = async function init() {
   await seedSirajBlock();
 };
 
-// Seed lunch break bookings Sun-Thu 12:30-13:30 (rolling 90 days)
+function localDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// Seed lunch break bookings Sun-Thu 12:30-13:30 (rolling 90 days).
+// Batched into a single round trip so restarts/redeploys stay fast.
 async function seedLunchBreaks() {
   const room = await db.prepare("SELECT id FROM rooms WHERE name = 'חדר ישיבות'").get();
   const admin = await db.prepare("SELECT id FROM users WHERE username = 'admin'").get();
   if (!room || !admin) return;
 
-  await db.prepare(`DELETE FROM bookings WHERE purpose='הפסקת צהריים' AND start_time='12:30' AND end_time='13:30'`).run();
+  const statements = [
+    { sql: `DELETE FROM bookings WHERE purpose='הפסקת צהריים' AND start_time='12:30' AND end_time='13:30'`, args: [] },
+  ];
 
   const today = new Date();
   for (let i = 0; i < 90; i++) {
@@ -100,35 +107,38 @@ async function seedLunchBreaks() {
     d.setDate(today.getDate() + i);
     const dow = d.getDay();
     if (dow === 5 || dow === 6) continue;
-
-    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    await db.prepare(`
-      INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status, notes)
-      VALUES (?, ?, 'קליקה', 'הפסקת צהריים', 15, ?, '12:30', '13:30', 'approved', 'שמור להפסקת צהריים')
-    `).run(room.id, admin.id, dateStr);
+    statements.push({
+      sql: `INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status, notes)
+            VALUES (?, ?, 'קליקה', 'הפסקת צהריים', 15, ?, '12:30', '13:30', 'approved', 'שמור להפסקת צהריים')`,
+      args: [room.id, admin.id, localDateStr(d)],
+    });
   }
+  await client.batch(statements, 'write');
 }
 
-// Block אולם סדנאות for סיראז' from 2026-07-01 to 2026-08-31
+// Block אולם סדנאות for סיראז' from 2026-07-01 to 2026-08-31 (batched).
 async function seedSirajBlock() {
   const room = await db.prepare("SELECT id FROM rooms WHERE name = 'אולם סדנאות'").get();
   const admin = await db.prepare("SELECT id FROM users WHERE username = 'admin'").get();
   if (!room || !admin) return;
 
-  await db.prepare(`DELETE FROM bookings WHERE booker_name='סיראז׳' AND room_id=?`).run(room.id);
+  const statements = [
+    { sql: `DELETE FROM bookings WHERE booker_name='סיראז׳' AND room_id=?`, args: [room.id] },
+  ];
 
   const start = new Date('2026-07-01');
   const end = new Date('2026-08-31');
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const dow = d.getDay();
     if (dow === 6) continue; // שבת סגור
-    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     const endTime = dow === 5 ? '14:00' : '20:00';
-    await db.prepare(`
-      INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status, notes)
-      VALUES (?, ?, 'סיראז׳', 'סיראז׳', 60, ?, '08:00', ?, 'approved', 'חסום לסיראז׳')
-    `).run(room.id, admin.id, dateStr, endTime);
+    statements.push({
+      sql: `INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status, notes)
+            VALUES (?, ?, 'סיראז׳', 'סיראז׳', 60, ?, '08:00', ?, 'approved', 'חסום לסיראז׳')`,
+      args: [room.id, admin.id, localDateStr(d), endTime],
+    });
   }
+  await client.batch(statements, 'write');
 }
 
 module.exports = db;
