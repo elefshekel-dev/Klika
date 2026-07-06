@@ -9,11 +9,14 @@ router.use((req, res, next) => {
 
 // GET /api/bookings
 router.get('/', async (req, res) => {
-  const { status, room_id, date } = req.query;
+  const { status, room_id, date, scope } = req.query;
   let query;
   let params = [];
 
-  if (req.user.role === 'manager') {
+  // Shared room calendar: everyone can see all approved bookings.
+  // Managers see everything; employees see all approved (for the calendar)
+  // but only via scope=all — otherwise they see just their own bookings.
+  if (req.user.role === 'manager' || scope === 'all') {
     query = `
       SELECT b.*, r.name as room_name, u.username
       FROM bookings b
@@ -21,7 +24,12 @@ router.get('/', async (req, res) => {
       JOIN users u ON b.user_id = u.id
       WHERE 1=1
     `;
-    if (status) { query += ' AND b.status = ?'; params.push(status); }
+    // Non-managers viewing the shared calendar only see approved bookings
+    if (req.user.role !== 'manager') {
+      query += " AND b.status = 'approved'";
+    } else if (status) {
+      query += ' AND b.status = ?'; params.push(status);
+    }
     if (room_id) { query += ' AND b.room_id = ?'; params.push(room_id); }
     if (date) { query += ' AND b.date = ?'; params.push(date); }
   } else {

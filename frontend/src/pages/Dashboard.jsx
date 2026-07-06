@@ -54,7 +54,7 @@ export default function Dashboard() {
 
   const loadData = async () => {
     try {
-      const data = await getBookings({ status: 'approved' });
+      const data = await getBookings({ status: 'approved', scope: 'all' });
       setBookings(data);
       if (user.role === 'manager') {
         const pending = await getBookings({ status: 'pending' });
