@@ -4,13 +4,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db');
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'שם משתמש וסיסמה נדרשים' });
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+  const user = await db.prepare('SELECT * FROM users WHERE username = ?').get(username);
   if (!user) {
     return res.status(401).json({ error: 'שם משתמש או סיסמה שגויים' });
   }
@@ -35,8 +35,8 @@ router.post('/login', (req, res) => {
 
 router.get('/me', (req, res) => {
   const authenticate = req.app.get('authenticate');
-  authenticate(req, res, () => {
-    const user = db.prepare('SELECT id, username, role, name FROM users WHERE id = ?').get(req.user.id);
+  authenticate(req, res, async () => {
+    const user = await db.prepare('SELECT id, username, role, name FROM users WHERE id = ?').get(req.user.id);
     if (!user) return res.status(404).json({ error: 'משתמש לא נמצא' });
     res.json(user);
   });

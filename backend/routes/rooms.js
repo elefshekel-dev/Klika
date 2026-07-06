@@ -7,8 +7,8 @@ router.use((req, res, next) => {
   authenticate(req, res, next);
 });
 
-router.get('/', (req, res) => {
-  const rooms = db.prepare('SELECT * FROM rooms').all();
+router.get('/', async (req, res) => {
+  const rooms = await db.prepare('SELECT * FROM rooms').all();
   res.json(rooms);
 });
 

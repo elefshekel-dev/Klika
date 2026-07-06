@@ -8,7 +8,7 @@ router.use((req, res, next) => {
 });
 
 // GET /api/bookings
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const { status, room_id, date } = req.query;
   let query;
   let params = [];
@@ -38,12 +38,12 @@ router.get('/', (req, res) => {
 
   query += ' ORDER BY b.date DESC, b.start_time DESC';
 
-  const bookings = db.prepare(query).all(...params);
+  const bookings = await db.prepare(query).all(...params);
   res.json(bookings);
 });
 
 // POST /api/bookings — auto-approved
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { room_id, booker_name, purpose, participants, date, start_time, end_time } = req.body;
 
   if (!room_id || !booker_name || !date || !start_time || !end_time) {
@@ -58,14 +58,14 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: hoursError });
   }
 
-  const room = db.prepare('SELECT * FROM rooms WHERE id = ?').get(room_id);
+  const room = await db.prepare('SELECT * FROM rooms WHERE id = ?').get(room_id);
   if (!room) return res.status(400).json({ error: 'חדר לא נמצא' });
 
   if (resolvedParticipants > room.capacity) {
     return res.status(400).json({ error: `מספר המשתתפים חורג מהתפוסה המקסימלית (${room.capacity})` });
   }
 
-  const conflicts = db.prepare(`
+  const conflicts = await db.prepare(`
     SELECT * FROM bookings
     WHERE room_id = ? AND date = ? AND status != 'rejected'
     AND NOT (end_time <= ? OR start_time >= ?)
@@ -75,12 +75,12 @@ router.post('/', (req, res) => {
     return res.status(409).json({ error: 'החדר תפוס בשעות אלו' });
   }
 
-  const result = db.prepare(`
+  const result = await db.prepare(`
     INSERT INTO bookings (room_id, user_id, booker_name, purpose, participants, date, start_time, end_time, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'approved')
   `).run(room_id, req.user.id, booker_name, resolvedPurpose, resolvedParticipants, date, start_time, end_time);
 
-  const booking = db.prepare(`
+  const booking = await db.prepare(`
     SELECT b.*, r.name as room_name FROM bookings b
     JOIN rooms r ON b.room_id = r.id
     WHERE b.id = ?
@@ -92,10 +92,10 @@ router.post('/', (req, res) => {
 // PATCH /api/bookings/:id — manager edit booking details
 router.patch('/:id', (req, res) => {
   const requireManager = req.app.get('requireManager');
-  requireManager(req, res, () => {
+  requireManager(req, res, async () => {
     const { room_id, booker_name, purpose, participants, date, start_time, end_time, notes } = req.body;
 
-    const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+    const booking = await db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
     if (!booking) return res.status(404).json({ error: 'הזמנה לא נמצאה' });
 
     const newRoomId = room_id || booking.room_id;
@@ -104,14 +104,14 @@ router.patch('/:id', (req, res) => {
     const newEnd = end_time || booking.end_time;
     const newParticipants = participants || booking.participants;
 
-    const room = db.prepare('SELECT * FROM rooms WHERE id = ?').get(newRoomId);
+    const room = await db.prepare('SELECT * FROM rooms WHERE id = ?').get(newRoomId);
     if (!room) return res.status(400).json({ error: 'חדר לא נמצא' });
 
     if (newParticipants > room.capacity) {
       return res.status(400).json({ error: `מספר המשתתפים חורג מהתפוסה המקסימלית (${room.capacity})` });
     }
 
-    const conflicts = db.prepare(`
+    const conflicts = await db.prepare(`
       SELECT * FROM bookings
       WHERE room_id = ? AND date = ? AND status != 'rejected' AND id != ?
       AND NOT (end_time <= ? OR start_time >= ?)
@@ -121,7 +121,7 @@ router.patch('/:id', (req, res) => {
       return res.status(409).json({ error: 'החדר תפוס בשעות אלו' });
     }
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE bookings SET room_id=?, booker_name=?, purpose=?, participants=?,
         date=?, start_time=?, end_time=?, notes=?
       WHERE id=?
@@ -135,7 +135,7 @@ router.patch('/:id', (req, res) => {
       req.params.id
     );
 
-    const updated = db.prepare(`
+    const updated = await db.prepare(`
       SELECT b.*, r.name as room_name FROM bookings b
       JOIN rooms r ON b.room_id = r.id WHERE b.id = ?
     `).get(req.params.id);
@@ -147,19 +147,19 @@ router.patch('/:id', (req, res) => {
 // PATCH /api/bookings/:id/status
 router.patch('/:id/status', (req, res) => {
   const requireManager = req.app.get('requireManager');
-  requireManager(req, res, () => {
+  requireManager(req, res, async () => {
     const { status, notes } = req.body;
     if (!status || !['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ error: 'סטטוס לא תקין' });
     }
 
-    const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+    const booking = await db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
     if (!booking) return res.status(404).json({ error: 'הזמנה לא נמצאה' });
 
-    db.prepare('UPDATE bookings SET status = ?, notes = ? WHERE id = ?')
+    await db.prepare('UPDATE bookings SET status = ?, notes = ? WHERE id = ?')
       .run(status, notes || null, req.params.id);
 
-    const updated = db.prepare(`
+    const updated = await db.prepare(`
       SELECT b.*, r.name as room_name FROM bookings b
       JOIN rooms r ON b.room_id = r.id WHERE b.id = ?
     `).get(req.params.id);
@@ -169,15 +169,15 @@ router.patch('/:id/status', (req, res) => {
 });
 
 // DELETE /api/bookings/:id
-router.delete('/:id', (req, res) => {
-  const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
+router.delete('/:id', async (req, res) => {
+  const booking = await db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
   if (!booking) return res.status(404).json({ error: 'הזמנה לא נמצאה' });
 
   if (booking.user_id !== req.user.id && req.user.role !== 'manager') {
     return res.status(403).json({ error: 'אין הרשאה לבטל הזמנה זו' });
   }
 
-  db.prepare('DELETE FROM bookings WHERE id = ?').run(req.params.id);
+  await db.prepare('DELETE FROM bookings WHERE id = ?').run(req.params.id);
   res.json({ message: 'הזמנה נמחקה בהצלחה' });
 });
 
