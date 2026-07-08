@@ -7,11 +7,12 @@ const ROOM_COLORS = {
   'אולם סדנאות': '#2563eb',
   'חדר ישיבות': '#7c3aed',
   'משרד פרטי': '#059669',
+  'עמדת הטענה אופקית': '#ea580c',
 };
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 // days 5 (Fri) and 6 (Sat) are closed
-const rooms = ['אולם סדנאות', 'חדר ישיבות', 'משרד פרטי'];
+const rooms = ['אולם סדנאות', 'חדר ישיבות', 'משרד פרטי', 'עמדת הטענה אופקית'];
 
 function getMonthDates(baseDate) {
   const year = baseDate.getFullYear();

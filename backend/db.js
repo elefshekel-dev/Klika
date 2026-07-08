@@ -73,6 +73,17 @@ db.init = async function init() {
     await db.prepare('INSERT INTO rooms (name, capacity, description) VALUES (?, ?, ?)').run('משרד פרטי', 4, 'חדר שקט לפגישות קטנות');
   }
 
+  // Ensure additional rooms exist (idempotent — added on existing databases too)
+  const extraRooms = [
+    ['עמדת הטענה אופקית', 1, 'עמדת עבודה'],
+  ];
+  for (const [name, capacity, description] of extraRooms) {
+    const exists = await db.prepare('SELECT id FROM rooms WHERE name = ?').get(name);
+    if (!exists) {
+      await db.prepare('INSERT INTO rooms (name, capacity, description) VALUES (?, ?, ?)').run(name, capacity, description);
+    }
+  }
+
   // Seed users if empty
   const userCount = await db.prepare('SELECT COUNT(*) as c FROM users').get();
   if (userCount.c === 0) {
