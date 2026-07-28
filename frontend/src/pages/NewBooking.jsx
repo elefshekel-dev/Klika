@@ -44,6 +44,7 @@ export default function NewBooking() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showLongConfirm, setShowLongConfirm] = useState(false);
 
   useEffect(() => {
     getRooms().then(setRooms).catch(console.error);
@@ -54,6 +55,13 @@ export default function NewBooking() {
     setError('');
   };
 
+  const durationMinutes = () => {
+    if (!form.start_time || !form.end_time) return 0;
+    const [sh, sm] = form.start_time.split(':').map(Number);
+    const [eh, em] = form.end_time.split(':').map(Number);
+    return (eh * 60 + em) - (sh * 60 + sm);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -61,6 +69,17 @@ export default function NewBooking() {
     const hoursError = validateHoursClient(form.date, form.start_time, form.end_time);
     if (hoursError) { setError(hoursError); return; }
 
+    // Warn when reserving the room for more than 90 minutes
+    if (durationMinutes() > 90) {
+      setShowLongConfirm(true);
+      return;
+    }
+
+    await submitBooking();
+  };
+
+  const submitBooking = async () => {
+    setShowLongConfirm(false);
     setLoading(true);
     try {
       await createBooking({
@@ -201,6 +220,23 @@ export default function NewBooking() {
           </div>
         </form>
       </div>
+
+      {showLongConfirm && (
+        <div className="modal-overlay" onClick={() => setShowLongConfirm(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>שריון ארוך</h3>
+            <p>את עומדת לסגור את החדר ליותר משעה, האם את בטוחה?</p>
+            <div className="modal-actions">
+              <button className="btn btn-primary" onClick={submitBooking} disabled={loading}>
+                {loading ? 'שולח...' : 'כן, שריין בכל זאת'}
+              </button>
+              <button className="btn btn-outline" onClick={() => setShowLongConfirm(false)}>
+                לא, חזרה לקביעת שעה
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
