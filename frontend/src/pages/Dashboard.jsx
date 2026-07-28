@@ -138,7 +138,7 @@ export default function Dashboard() {
                             title={`${room} | ${b.booker_name} - ${b.purpose} (${b.start_time}-${b.end_time})`}
                           >
                             <span className="chip-room-dot" style={{ background: 'rgba(255,255,255,0.5)' }}></span>
-                            <span>{b.start_time} {b.purpose}</span>
+                            <span>{b.start_time} {b.booker_name}</span>
                           </div>
                         ));
                       })}
