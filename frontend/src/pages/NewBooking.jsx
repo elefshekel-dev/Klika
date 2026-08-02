@@ -45,6 +45,7 @@ export default function NewBooking() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showLongConfirm, setShowLongConfirm] = useState(false);
+  const [showTooLong, setShowTooLong] = useState(false);
 
   useEffect(() => {
     getRooms().then(setRooms).catch(console.error);
@@ -69,8 +70,14 @@ export default function NewBooking() {
     const hoursError = validateHoursClient(form.date, form.start_time, form.end_time);
     if (hoursError) { setError(hoursError); return; }
 
+    const duration = durationMinutes();
+    // Hard limit: no reservation longer than 2 hours
+    if (duration > 120) {
+      setShowTooLong(true);
+      return;
+    }
     // Warn when reserving the room for more than 90 minutes
-    if (durationMinutes() > 90) {
+    if (duration > 90) {
       setShowLongConfirm(true);
       return;
     }
@@ -232,6 +239,20 @@ export default function NewBooking() {
               </button>
               <button className="btn btn-outline" onClick={() => setShowLongConfirm(false)}>
                 לא, חזרה לקביעת שעה
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showTooLong && (
+        <div className="modal-overlay" onClick={() => setShowTooLong(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>שריון ארוך מדי</h3>
+            <p>לא ניתן לשריין חדר ליותר משעתיים. לפרטים נוספים נא לפנות למנהלת הקליקה.</p>
+            <div className="modal-actions">
+              <button className="btn btn-primary" onClick={() => setShowTooLong(false)}>
+                חזרה לקביעת שעה
               </button>
             </div>
           </div>
