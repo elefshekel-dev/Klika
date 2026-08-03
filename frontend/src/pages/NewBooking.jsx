@@ -5,8 +5,10 @@ import { useAuth } from '../contexts/AuthContext';
 
 const PURPOSE_OPTIONS = ['ישיבה', 'שעת קהילה', 'הרצאה/סדנה'];
 
-// Booker options sorted in Hebrew alphabetical order (Latin names last)
+// Booker options: Latin names first, then Hebrew names in alphabetical order
 const BOOKER_OPTIONS = [
+  'Cybreex',
+  'RETAMA',
   'אוריאל חכימי',
   'אלון נבו',
   'הנהלה',
@@ -15,8 +17,6 @@ const BOOKER_OPTIONS = [
   'נתנאל פרץ',
   'צבי אופיר',
   'שחר עובדיה',
-  'Cybreex',
-  'RETAMA',
 ];
 
 function validateHoursClient(date, startTime, endTime) {
