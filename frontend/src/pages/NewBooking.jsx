@@ -5,6 +5,20 @@ import { useAuth } from '../contexts/AuthContext';
 
 const PURPOSE_OPTIONS = ['ישיבה', 'שעת קהילה', 'הרצאה/סדנה'];
 
+// Booker options sorted in Hebrew alphabetical order (Latin names last)
+const BOOKER_OPTIONS = [
+  'אוריאל חכימי',
+  'אלון נבו',
+  'הנהלה',
+  'יהודה ועקנין',
+  'נוה מבורך',
+  'נתנאל פרץ',
+  'צבי אופיר',
+  'שחר עובדיה',
+  'Cybreex',
+  'RETAMA',
+];
+
 function validateHoursClient(date, startTime, endTime) {
   if (!date || !startTime || !endTime) return null;
   const d = new Date(date + 'T00:00:00');
@@ -35,7 +49,7 @@ export default function NewBooking() {
   const [rooms, setRooms] = useState([]);
   const [form, setForm] = useState({
     room_id: '',
-    booker_name: user?.name || '',
+    booker_name: '',
     purpose: '',
     date: '',
     start_time: '',
@@ -101,7 +115,7 @@ export default function NewBooking() {
       setSuccess(true);
       setForm({
         room_id: '',
-        booker_name: user?.name || '',
+        booker_name: '',
         purpose: '',
         date: '',
         start_time: '',
@@ -155,15 +169,18 @@ export default function NewBooking() {
 
             <div className="form-group">
               <label htmlFor="booker_name">מזמין/ה *</label>
-              <input
+              <select
                 id="booker_name"
                 name="booker_name"
-                type="text"
                 value={form.booker_name}
                 onChange={handleChange}
-                placeholder="שם מלא"
                 required
-              />
+              >
+                <option value="">בחר/י מזמין/ה...</option>
+                {BOOKER_OPTIONS.map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">
