@@ -9,6 +9,7 @@ const PURPOSE_OPTIONS = ['ישיבה', 'שעת קהילה', 'הרצאה/סדנה
 const BOOKER_OPTIONS = [
   'Cybreex',
   'RETAMA',
+  'Siraj',
   'אוריאל חכימי',
   'אלון נבו',
   'הנהלה',
