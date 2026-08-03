@@ -7,11 +7,13 @@ const PURPOSE_OPTIONS = ['ישיבה', 'שעת קהילה', 'הרצאה/סדנה
 
 // Booker options: Latin names first, then Hebrew names in alphabetical order
 const BOOKER_OPTIONS = [
+  'Connect',
   'Cybreex',
   'RETAMA',
   'Siraj',
   'אוריאל חכימי',
   'אלון נבו',
+  'דניאל בלנקוביץ׳',
   'הנהלה',
   'יהודה ועקנין',
   'נוה מבורך',
