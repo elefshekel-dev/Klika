@@ -5,7 +5,6 @@ import { getBookings, deleteBooking } from '../api';
 const ROOM_COLORS = {
   'אולם סדנאות': '#2563eb',
   'חדר ישיבות': '#7c3aed',
-  'משרד פרטי': '#059669',
   'עמדת הטענה אופקית': '#ea580c',
 };
 
@@ -13,7 +12,7 @@ const STATUS_LABELS = { pending: 'ממתין', approved: 'מאושר', rejected:
 const STATUS_CLASSES = { pending: 'badge-warning', approved: 'badge-success', rejected: 'badge-danger' };
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-const rooms = ['אולם סדנאות', 'חדר ישיבות', 'משרד פרטי', 'עמדת הטענה אופקית'];
+const rooms = ['אולם סדנאות', 'חדר ישיבות', 'עמדת הטענה אופקית'];
 
 function getMonthDates(baseDate) {
   const year = baseDate.getFullYear();

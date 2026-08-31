@@ -8,7 +8,8 @@ router.use((req, res, next) => {
 });
 
 router.get('/', async (req, res) => {
-  const rooms = await db.prepare('SELECT * FROM rooms').all();
+  // משרד פרטי is hidden from booking options (kept in DB for history)
+  const rooms = await db.prepare("SELECT * FROM rooms WHERE name != 'משרד פרטי'").all();
   res.json(rooms);
 });
 
