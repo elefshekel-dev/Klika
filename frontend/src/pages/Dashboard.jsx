@@ -6,12 +6,11 @@ import { useAuth } from '../contexts/AuthContext';
 const ROOM_COLORS = {
   'אולם סדנאות': '#2563eb',
   'חדר ישיבות': '#7c3aed',
-  'עמדת הטענה אופקית': '#ea580c',
 };
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 // days 5 (Fri) and 6 (Sat) are closed
-const rooms = ['אולם סדנאות', 'חדר ישיבות', 'עמדת הטענה אופקית'];
+const rooms = ['אולם סדנאות', 'חדר ישיבות'];
 
 function getMonthDates(baseDate) {
   const year = baseDate.getFullYear();
