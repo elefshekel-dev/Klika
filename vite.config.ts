@@ -3,8 +3,13 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'node:path';
 
+// נתיב הבסיס. ברירת מחדל '/' (פיתוח מקומי ופריסה לשורש). לפריסה תחת תת-נתיב
+// (כמו GitHub Pages ב-/Klika/) מגדירים VITE_BASE בזמן הבנייה.
+const base = process.env.VITE_BASE || '/';
+
 // אפליקציה סטטית בלבד — אין backend. Local-first עם PWA לעבודה אופליין.
 export default defineConfig({
+  base,
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -25,7 +30,8 @@ export default defineConfig({
         background_color: '#faf9f7',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
+        start_url: base,
+        scope: base,
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
@@ -40,7 +46,7 @@ export default defineConfig({
       workbox: {
         // כל הנכסים הסטטיים נשמרים ל-cache כדי לעבוד אופליין לחלוטין.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: `${base}index.html`,
         // Google Identity Services וקריאות ה-Drive לא נשמרות ב-cache.
         navigateFallbackDenylist: [/^\/api/, /accounts\.google\.com/],
       },

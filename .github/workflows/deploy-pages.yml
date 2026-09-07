@@ -1,0 +1,43 @@
+# בונה את רסיסים ומפרסם דמו חי ל-GitHub Pages (ענף gh-pages).
+# הכתובת שתתקבל: https://<user>.github.io/Klika/
+name: Deploy demo to GitHub Pages
+
+on:
+  push:
+    branches: [claude/literary-fragments-pwa-86jq7d]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write # דרוש כדי לדחוף לענף gh-pages
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # בנייה עם נתיב בסיס תת-תיקייה כדי שהנכסים ייטענו תחת /Klika/.
+      - run: npm run build
+        env:
+          VITE_BASE: /Klika/
+
+      # נפילת SPA: כל נתיב לא-קיים יוגש כ-index.html (Pages לא עושה rewrite).
+      - run: cp dist/index.html dist/404.html
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages

@@ -7,15 +7,7 @@ dev-dist/
 .DS_Store
 *.log
 
-# סקריפטים לבדיקות ידניות מקומיות (תלויי-סביבה, לא נכללים במאגר)
-scripts/smoke.mjs
-scripts/smoke2.mjs
-scripts/debug.mjs
-scripts/dbgerr.mjs
-scripts/dbinspect.mjs
-scripts/smoke3.mjs
-scripts/smoke4.mjs
-scripts/merge.test.mjs
-scripts/smoke6.mjs
-scripts/smokever.mjs
-scripts/shots.mjs
+# סקריפטים לבדיקות ידניות מקומיות (תלויי-סביבה, לא נכללים במאגר).
+# רק gen-icons.mjs נשמר במאגר.
+scripts/*.mjs
+!scripts/gen-icons.mjs
