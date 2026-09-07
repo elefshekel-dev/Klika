@@ -3,6 +3,9 @@ import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import LibraryPage from './features/library/LibraryPage';
 import EditorPage from './features/editor/EditorPage';
 import SettingsPage from './features/settings/SettingsPage';
+import CollectionsListPage from './features/collections/CollectionsListPage';
+import CollectionPage from './features/collections/CollectionPage';
+import ContinuousReadPage from './features/collections/ContinuousReadPage';
 import Fab from './components/Fab';
 import { createFragment } from './db/fragments';
 import { ensureSettings } from './db/settings';
@@ -15,7 +18,11 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const isEditor = location.pathname.startsWith('/f/');
-  const hideFab = isEditor || location.pathname.startsWith('/settings');
+  // מסתירים את כפתור הלכידה במסכים ממוקדים: עורך, הגדרות, ותצוגת אסופה/קריאה רצופה.
+  const hideFab =
+    isEditor ||
+    location.pathname.startsWith('/settings') ||
+    location.pathname.startsWith('/collections/');
 
   // גובה חלון תצוגה דינמי — כדי שהמקלדת בנייד לא תחתוך את העורך.
   useViewportHeight();
@@ -60,6 +67,9 @@ export default function App() {
           <Route path="/" element={<LibraryPage />} />
           <Route path="/f/:id" element={<EditorPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/collections" element={<CollectionsListPage />} />
+          <Route path="/collections/:id" element={<CollectionPage />} />
+          <Route path="/collections/:id/read" element={<ContinuousReadPage />} />
           <Route path="*" element={<LibraryPage />} />
         </Routes>
       </div>

@@ -13,6 +13,7 @@ import { useSwipe } from '@/hooks/useSwipe';
 import EditorSurface from './EditorSurface';
 import EditorTopBar from './EditorTopBar';
 import TagEditor from '@/components/TagEditor';
+import AddToCollectionSheet from '@/features/collections/AddToCollectionSheet';
 
 /** מסך העורך. אחראי לשמירה אוטומטית, ניקוי רסיס ריק, וניווט בין רסיסים. */
 export default function EditorPage() {
@@ -24,6 +25,8 @@ export default function EditorPage() {
     () => (id ? db.fragments.get(id) : undefined),
     [id],
   );
+
+  const [collectionOpen, setCollectionOpen] = useState(false);
 
   // סדר ניווט — צילום מצב חד-פעמי כדי שהשכנים לא יזוזו תוך כדי עריכה.
   const [order, setOrder] = useState<string[]>([]);
@@ -93,6 +96,7 @@ export default function EditorPage() {
         onBack={goBack}
         onPrev={prevId ? () => goTo(prevId) : undefined}
         onNext={nextId ? () => goTo(nextId) : undefined}
+        onAddToCollection={() => setCollectionOpen(true)}
       />
       <div className="min-h-0 flex-1" {...swipe}>
         <EditorSurface
@@ -107,6 +111,11 @@ export default function EditorPage() {
       <div className="border-t border-paper-200 px-4 py-2">
         <TagEditor fragment={fragment} />
       </div>
+
+      <AddToCollectionSheet
+        fragmentId={collectionOpen ? fragment.id : null}
+        onClose={() => setCollectionOpen(false)}
+      />
     </div>
   );
 }

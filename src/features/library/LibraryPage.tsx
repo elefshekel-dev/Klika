@@ -7,7 +7,8 @@ import type { Fragment } from '@/db/types';
 import FragmentCard from '@/components/FragmentCard';
 import TagEditor from '@/components/TagEditor';
 import TagChip from '@/components/TagChip';
-import { IconSettings } from '@/components/icons';
+import { IconSettings, IconLayers } from '@/components/icons';
+import AddToCollectionSheet from '@/features/collections/AddToCollectionSheet';
 import EmptyState from './EmptyState';
 import SearchBar from './SearchBar';
 import ViewTabs from './ViewTabs';
@@ -27,6 +28,7 @@ export default function LibraryPage() {
   const [filter, setFilter] = useState<LibraryFilter>(emptyFilter);
   const [showFilter, setShowFilter] = useState(false);
   const [actionFragment, setActionFragment] = useState<Fragment | null>(null);
+  const [addToCollectionId, setAddToCollectionId] = useState<string | null>(null);
 
   const fragments = useLibrary(filter);
 
@@ -45,13 +47,22 @@ export default function LibraryPage() {
       <header className="shrink-0 space-y-3 border-b border-paper-200 bg-paper-50/90 px-4 pb-3 pt-4 backdrop-blur">
         <div className="flex items-center justify-between">
           <h1 className="font-reading text-2xl text-ink-900">רסיסים</h1>
-          <button
-            onClick={() => navigate('/settings')}
-            aria-label="הגדרות"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-ink-500 hover:bg-paper-200"
-          >
-            <IconSettings size={20} />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => navigate('/collections')}
+              aria-label="אסופות"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-ink-500 hover:bg-paper-200"
+            >
+              <IconLayers size={20} />
+            </button>
+            <button
+              onClick={() => navigate('/settings')}
+              aria-label="הגדרות"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-ink-500 hover:bg-paper-200"
+            >
+              <IconSettings size={20} />
+            </button>
+          </div>
         </div>
 
         <SearchBar value={filter.search} onChange={(search) => setFilter((f) => ({ ...f, search }))} />
@@ -132,7 +143,27 @@ export default function LibraryPage() {
         )}
       </div>
 
-      <FragmentActionSheet fragment={actionFragment} onClose={() => setActionFragment(null)} />
+      <FragmentActionSheet
+        fragment={actionFragment}
+        onClose={() => setActionFragment(null)}
+        extraActions={(f) => (
+          <button
+            onClick={() => {
+              setActionFragment(null);
+              setAddToCollectionId(f.id);
+            }}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-right text-[15px] text-ink-800 hover:bg-paper-100"
+          >
+            <IconLayers size={18} className="text-ink-400" />
+            הוספה לאסופה
+          </button>
+        )}
+      />
+
+      <AddToCollectionSheet
+        fragmentId={addToCollectionId}
+        onClose={() => setAddToCollectionId(null)}
+      />
     </div>
   );
 }
