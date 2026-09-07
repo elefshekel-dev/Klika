@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import type { Fragment, Settings } from '@/db/types';
 import { detectDir } from '@/lib/direction';
 import { textStats } from '@/lib/textStats';
@@ -9,6 +9,8 @@ interface Props {
   /** נקרא בכל שינוי תוכן — האחראי משהה (debounce) בעצמו. */
   onChange: (content: string) => void;
   autoFocus?: boolean;
+  /** תוכן שנכפה מבחוץ (למשל אחרי שחזור גרסה). גובר על תוכן הרסיס באתחול. */
+  overrideContent?: string | null;
 }
 
 /**
@@ -18,14 +20,17 @@ interface Props {
  * - טיפוגרפיה נשלטת מההגדרות (גודל, רוחב שורה, גופן).
  * - מונה מילים/שורות דיסקרטי בפינה.
  */
-export default function EditorSurface({ fragment, settings, onChange, autoFocus }: Props) {
-  const [value, setValue] = useState(fragment.content);
+export default function EditorSurface({
+  fragment,
+  settings,
+  onChange,
+  autoFocus,
+  overrideContent,
+}: Props) {
+  // הרכיב ממוסגר לפי מזהה הרסיס (ו-nonce שחזור) בהורה, ולכן נטען מחדש בכל
+  // מעבר בין רסיסים או שחזור — האתחול כאן מספיק, בלי effect שמסנכרן תוכן.
+  const [value, setValue] = useState(overrideContent ?? fragment.content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // כשהרסיס מתחלף (ניווט prev/next) — טוענים את התוכן החדש.
-  useEffect(() => {
-    setValue(fragment.content);
-  }, [fragment.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // מיקוד אוטומטי עם סמן בסוף — כניסה מיידית לכתיבה.
   useLayoutEffect(() => {

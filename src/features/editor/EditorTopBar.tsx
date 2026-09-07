@@ -1,17 +1,30 @@
-import { IconArrowRight, IconChevronUp, IconChevronDown, IconLayers } from '@/components/icons';
+import {
+  IconArrowRight,
+  IconChevronUp,
+  IconChevronDown,
+  IconLayers,
+  IconClock,
+} from '@/components/icons';
 
 interface Props {
   onBack: () => void;
   onPrev?: () => void;
   onNext?: () => void;
   onAddToCollection: () => void;
+  onHistory: () => void;
 }
 
 /**
  * סרגל עליון מינימלי לעורך. בנייד — דק ולא פולשני.
  * ניווט prev/next בין רסיסים לפי סדר התצוגה.
  */
-export default function EditorTopBar({ onBack, onPrev, onNext, onAddToCollection }: Props) {
+export default function EditorTopBar({
+  onBack,
+  onPrev,
+  onNext,
+  onAddToCollection,
+  onHistory,
+}: Props) {
   return (
     <div className="flex items-center justify-between px-2 py-1.5">
       <button
@@ -23,6 +36,13 @@ export default function EditorTopBar({ onBack, onPrev, onNext, onAddToCollection
       </button>
 
       <div className="flex items-center gap-1">
+        <button
+          onClick={onHistory}
+          aria-label="גרסאות קודמות"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-ink-500 hover:bg-paper-200 active:bg-paper-300"
+        >
+          <IconClock size={20} />
+        </button>
         <button
           onClick={onAddToCollection}
           aria-label="הוספה לאסופה"

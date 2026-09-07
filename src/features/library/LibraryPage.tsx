@@ -7,7 +7,8 @@ import type { Fragment } from '@/db/types';
 import FragmentCard from '@/components/FragmentCard';
 import TagEditor from '@/components/TagEditor';
 import TagChip from '@/components/TagChip';
-import { IconSettings, IconLayers } from '@/components/icons';
+import { IconSettings, IconLayers, IconDice, IconClock } from '@/components/icons';
+import { randomFragment } from '@/db/discover';
 import SyncIndicator from '@/components/SyncIndicator';
 import AddToCollectionSheet from '@/features/collections/AddToCollectionSheet';
 import EmptyState from './EmptyState';
@@ -50,6 +51,25 @@ export default function LibraryPage() {
           <h1 className="font-reading text-2xl text-ink-900">רסיסים</h1>
           <div className="flex items-center gap-1">
             <SyncIndicator />
+            <button
+              onClick={async () => {
+                const f = await randomFragment();
+                if (f) navigate(`/f/${f.id}`);
+              }}
+              aria-label="רסיס אקראי"
+              title="רסיס אקראי"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-ink-500 hover:bg-paper-200"
+            >
+              <IconDice size={20} />
+            </button>
+            <button
+              onClick={() => navigate('/memories')}
+              aria-label="זיכרונות"
+              title="לפני שנה / החודש הזה בשנים קודמות"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-ink-500 hover:bg-paper-200"
+            >
+              <IconClock size={20} />
+            </button>
             <button
               onClick={() => navigate('/collections')}
               aria-label="אסופות"

@@ -4,6 +4,7 @@ import { updateSettings } from '@/db/settings';
 import { IconArrowRight } from '@/components/icons';
 import TagManager from './TagManager';
 import SyncSection from './SyncSection';
+import DataSection from './DataSection';
 
 /** מסך הגדרות: טיפוגרפיה של העורך וניהול תגיות. */
 export default function SettingsPage() {
@@ -89,6 +90,8 @@ export default function SettingsPage() {
         <SyncSection />
 
         <TagManager />
+
+        <DataSection />
       </div>
     </div>
   );

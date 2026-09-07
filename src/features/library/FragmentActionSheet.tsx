@@ -2,7 +2,8 @@ import Sheet from '@/components/Sheet';
 import type { Fragment } from '@/db/types';
 import { togglePin, softDeleteFragment } from '@/db/fragments';
 import { displayTitle } from '@/lib/textStats';
-import { IconPin, IconX } from '@/components/icons';
+import { fragmentToText, copyText, downloadText, safeFileName } from '@/lib/export';
+import { IconPin, IconX, IconLayers, IconDownload } from '@/components/icons';
 
 interface Props {
   fragment: Fragment | null;
@@ -31,6 +32,23 @@ export default function FragmentActionSheet({ fragment, onClose, extraActions }:
           {fragment.isPinned ? 'ביטול נעיצה' : 'נעיצה'}
         </button>
         {extraActions?.(fragment)}
+        <button
+          onClick={() => void copyText(fragmentToText(fragment)).then(onClose)}
+          className={rowClass}
+        >
+          <IconLayers size={18} className="text-ink-400" />
+          העתקת הטקסט
+        </button>
+        <button
+          onClick={() => {
+            downloadText(`${safeFileName(fragment.content)}.md`, fragmentToText(fragment), 'text/markdown');
+            onClose();
+          }}
+          className={rowClass}
+        >
+          <IconDownload size={18} className="text-ink-400" />
+          ייצוא כקובץ
+        </button>
         <button onClick={() => void remove()} className={`${rowClass} text-rose-700`}>
           <IconX size={18} className="text-rose-400" />
           מחיקה

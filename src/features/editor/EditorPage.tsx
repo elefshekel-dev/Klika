@@ -7,11 +7,13 @@ import {
   updateFragmentContent,
   deleteFragmentIfEmpty,
 } from '@/db/fragments';
+import { snapshotVersion } from '@/db/versions';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 import { useSettings } from '@/hooks/useSettings';
 import { useSwipe } from '@/hooks/useSwipe';
 import EditorSurface from './EditorSurface';
 import EditorTopBar from './EditorTopBar';
+import VersionsSheet from './VersionsSheet';
 import TagEditor from '@/components/TagEditor';
 import AddToCollectionSheet from '@/features/collections/AddToCollectionSheet';
 
@@ -27,6 +29,14 @@ export default function EditorPage() {
   );
 
   const [collectionOpen, setCollectionOpen] = useState(false);
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  // תוכן שנכפה אחרי שחזור גרסה, קשור למזהה רסיס ספציפי כדי להימנע ממרוצי מצב.
+  const [restored, setRestored] = useState<{ id: string; content: string; nonce: number } | null>(
+    null,
+  );
+
+  // התוכן האחרון שהוקלד — לצילום גרסה בעת עזיבה, וללא תלות ב-fetch מהמסד.
+  const latestContent = useRef<string>('');
 
   // סדר ניווט — צילום מצב חד-פעמי כדי שהשכנים לא יזוזו תוך כדי עריכה.
   const [order, setOrder] = useState<string[]>([]);
@@ -37,38 +47,55 @@ export default function EditorPage() {
     void activeFragments().then((active) => setOrder(active.map((f) => f.id)));
   }, []);
 
+  // מסנכרנים את התוכן האחרון עם הרסיס הנטען (בטעינה ובמעבר בין רסיסים).
+  useEffect(() => {
+    if (fragment) latestContent.current = fragment.content;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fragment?.id]);
+
   const save = useDebouncedCallback((content: string) => {
-    if (id) void updateFragmentContent(id, content);
+    if (!id) return;
+    void updateFragmentContent(id, content);
+    // צילום גרסה מווסת (לכל היותר אחד ל-90ש') תוך כדי עריכה.
+    void snapshotVersion(id, content);
   }, 500);
 
   const handleChange = useCallback(
-    (content: string) => save.call(content),
+    (content: string) => {
+      latestContent.current = content;
+      save.call(content);
+    },
     [save],
   );
 
-  // ניקוי רסיס ריק בעת עזיבת העורך.
+  // שמירה, צילום גרסה סופי, וניקוי רסיס ריק בעת עזיבה/מעבר לרסיס אחר.
+  const finalize = useCallback(
+    (currentId: string | undefined) => {
+      save.flush();
+      if (!currentId) return;
+      void snapshotVersion(currentId, latestContent.current, true);
+      void deleteFragmentIfEmpty(currentId);
+    },
+    [save],
+  );
+
   useEffect(() => {
     const currentId = id;
-    return () => {
-      save.flush();
-      if (currentId) void deleteFragmentIfEmpty(currentId);
-    };
-  }, [id, save]);
+    return () => finalize(currentId);
+  }, [id, finalize]);
 
   const goTo = useCallback(
     (targetId: string) => {
-      save.flush();
-      if (id) void deleteFragmentIfEmpty(id);
+      finalize(id);
       navigate(`/f/${targetId}`, { replace: true });
     },
-    [id, navigate, save],
+    [id, navigate, finalize],
   );
 
   const goBack = useCallback(() => {
-    save.flush();
-    if (id) void deleteFragmentIfEmpty(id);
+    finalize(id);
     navigate('/');
-  }, [id, navigate, save]);
+  }, [id, navigate, finalize]);
 
   // ניווט לפי סדר התצוגה (מחושב גם כשהרסיס עדיין נטען — הוקים לפני return).
   const idx = fragment ? order.indexOf(fragment.id) : -1;
@@ -90,6 +117,9 @@ export default function EditorPage() {
     );
   }
 
+  // override תקף רק לרסיס שממנו שוחזר — כדי שניווט לרסיס אחר לא יציג תוכן ישן.
+  const override = restored && restored.id === fragment.id ? restored : null;
+
   return (
     <div className="flex h-full flex-col bg-paper-50">
       <EditorTopBar
@@ -97,13 +127,15 @@ export default function EditorPage() {
         onPrev={prevId ? () => goTo(prevId) : undefined}
         onNext={nextId ? () => goTo(nextId) : undefined}
         onAddToCollection={() => setCollectionOpen(true)}
+        onHistory={() => setVersionsOpen(true)}
       />
       <div className="min-h-0 flex-1" {...swipe}>
         <EditorSurface
-          key={fragment.id}
+          key={`${fragment.id}:${override?.nonce ?? 0}`}
           fragment={fragment}
           settings={settings}
           onChange={handleChange}
+          overrideContent={override?.content ?? null}
           autoFocus
         />
       </div>
@@ -115,6 +147,17 @@ export default function EditorPage() {
       <AddToCollectionSheet
         fragmentId={collectionOpen ? fragment.id : null}
         onClose={() => setCollectionOpen(false)}
+      />
+
+      <VersionsSheet
+        fragmentId={fragment.id}
+        open={versionsOpen}
+        onClose={() => setVersionsOpen(false)}
+        onRestored={(content) => {
+          latestContent.current = content;
+          setRestored((r) => ({ id: fragment.id, content, nonce: (r?.nonce ?? 0) + 1 }));
+          setVersionsOpen(false);
+        }}
       />
     </div>
   );

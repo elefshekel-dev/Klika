@@ -3,6 +3,7 @@ import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import LibraryPage from './features/library/LibraryPage';
 import EditorPage from './features/editor/EditorPage';
 import SettingsPage from './features/settings/SettingsPage';
+import MemoriesPage from './features/library/MemoriesPage';
 import CollectionsListPage from './features/collections/CollectionsListPage';
 import CollectionPage from './features/collections/CollectionPage';
 import ContinuousReadPage from './features/collections/ContinuousReadPage';
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/" element={<LibraryPage />} />
           <Route path="/f/:id" element={<EditorPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/memories" element={<MemoriesPage />} />
           <Route path="/collections" element={<CollectionsListPage />} />
           <Route path="/collections/:id" element={<CollectionPage />} />
           <Route path="/collections/:id/read" element={<ContinuousReadPage />} />
