@@ -35,6 +35,10 @@ jobs:
       # נפילת SPA: כל נתיב לא-קיים יוגש כ-index.html (Pages לא עושה rewrite).
       - run: cp dist/index.html dist/404.html
 
+      # חותמת בנייה ייחודית — מבטיחה ש-gh-pages משתנה בכל ריצה, כך ש-GitHub
+      # תמיד בונה מחדש את האתר (בלי זה, פרסום עם תוכן זהה מדלג על הדחיפה).
+      - run: date -u +"%Y-%m-%dT%H:%M:%SZ" > dist/build-info.txt
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
