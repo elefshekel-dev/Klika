@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  /* גובה חלון תצוגה דינמי — מטופל דרך JS ל-fallback, ו-dvh במקום הנתמך. */
+  --app-vh: 100dvh;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: theme('colors.paper.50');
+  color: theme('colors.ink.900');
+  font-family: theme('fontFamily.sans');
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* מונע גלילת גומי מיותרת בנייד. */
+  overscroll-behavior-y: none;
+}
+
+/* אזורי מגע נוחים לאגודל, כברירת מחדל. */
+button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* העורך — שבירות שורה קדושות. white-space: pre-wrap שומר על כל רווח ושורה. */
+.editor-textarea {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* גלילה חלקה עם תמיכה ב-momentum בנייד. */
+.scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* מסתיר פס גלילה אך משאיר גלילה פעילה. */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,7 +1,13 @@
 node_modules/
-backend/node_modules/
-frontend/node_modules/
-backend/data/
 dist/
+dev-dist/
 .env
+.env.local
 *.local
+.DS_Store
+*.log
+
+# סקריפטים לבדיקות ידניות מקומיות (תלויי-סביבה, לא נכללים במאגר).
+# רק gen-icons.mjs נשמר במאגר.
+scripts/*.mjs
+!scripts/gen-icons.mjs
