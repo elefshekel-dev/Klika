@@ -20,7 +20,7 @@ export default function ContinuousReadPage() {
 
   const fontFamily =
     settings.editorFont === 'reading'
-      ? '"Frank Ruhl Libre", Georgia, serif'
+      ? '"Rubik", "Assistant", system-ui, sans-serif'
       : '"Assistant", system-ui, sans-serif';
 
   return (

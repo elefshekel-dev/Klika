@@ -20,8 +20,8 @@ export default {
         },
       },
       fontFamily: {
-        // גופן קריאה נעים לעברית, עם נפילה לגופני מערכת.
-        reading: ['"Frank Ruhl Libre"', 'Georgia', 'serif'],
+        // גופן קריאה רך ומעוגל (Rubik) עם עברית מלאה, ונפילה לגופני מערכת.
+        reading: ['"Rubik"', '"Assistant"', 'system-ui', 'sans-serif'],
         sans: ['"Assistant"', 'system-ui', 'sans-serif'],
       },
     },

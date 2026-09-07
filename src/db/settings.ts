@@ -11,7 +11,7 @@ import { getDeviceId } from '@/lib/device';
 const DEFAULTS: Omit<Settings, 'deviceId'> = {
   id: 'singleton',
   editorFontSize: 19,
-  editorLineWidth: 34,
+  editorLineWidth: 42,
   editorFont: 'reading',
   showCounter: true,
 };

@@ -52,7 +52,7 @@ export default function SettingsPage() {
             <input
               type="range"
               min={24}
-              max={60}
+              max={90}
               value={settings.editorLineWidth}
               onChange={(e) => void updateSettings({ editorLineWidth: Number(e.target.value) })}
               className="w-full accent-ink-800"
@@ -70,7 +70,7 @@ export default function SettingsPage() {
                     settings.editorFont === font ? 'bg-ink-900 text-paper-50' : 'text-ink-500'
                   }`}
                 >
-                  {font === 'reading' ? 'קריאה' : 'נקי'}
+                  {font === 'reading' ? 'רך' : 'נקי'}
                 </button>
               ))}
             </div>
