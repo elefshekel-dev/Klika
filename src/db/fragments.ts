@@ -41,17 +41,21 @@ export async function updateFragmentTitle(id: string, title: string): Promise<vo
 }
 
 /**
- * מוחק בשקט רסיס ריק שננטש. נחשב ריק אם אין תוכן (אחרי trim לבדיקה בלבד)
- * ואין לו תגיות. מחיקה פיזית — רסיס ריק מעולם לא "היה", אין טעם ב-tombstone.
+ * מוחק בשקט רסיס ריק שננטש. נחשב ריק אם אין תוכן (אחרי trim לבדיקה בלבד),
+ * אין לו תגיות, והוא אינו שייך לאף אסופה (כדי לא להשאיר הפניה תלויה).
+ * מחיקה פיזית — רסיס ריק מעולם לא "היה", אין טעם ב-tombstone.
  */
 export async function deleteFragmentIfEmpty(id: string): Promise<boolean> {
   const f = await db.fragments.get(id);
   if (!f) return false;
-  if (f.content.trim() === '' && f.tagIds.length === 0) {
-    await db.fragments.delete(id);
-    return true;
-  }
-  return false;
+  if (f.content.trim() !== '' || f.tagIds.length > 0) return false;
+
+  const collections = await db.collections.toArray();
+  const inCollection = collections.some((c) => !c.isDeleted && c.fragmentIds.includes(id));
+  if (inCollection) return false;
+
+  await db.fragments.delete(id);
+  return true;
 }
 
 /** מחיקה רכה (tombstone) — נשמר לסנכרון. */
