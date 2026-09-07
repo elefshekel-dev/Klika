@@ -9,6 +9,7 @@ dev-dist/
 
 # סקריפטים לבדיקות ידניות מקומיות (תלויי-סביבה, לא נכללים במאגר)
 scripts/smoke.mjs
+scripts/smoke2.mjs
 scripts/debug.mjs
 scripts/dbgerr.mjs
 scripts/dbinspect.mjs

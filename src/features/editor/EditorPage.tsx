@@ -11,6 +11,7 @@ import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 import { useSettings } from '@/hooks/useSettings';
 import EditorSurface from './EditorSurface';
 import EditorTopBar from './EditorTopBar';
+import TagEditor from '@/components/TagEditor';
 
 /** מסך העורך. אחראי לשמירה אוטומטית, ניקוי רסיס ריק, וניווט בין רסיסים. */
 export default function EditorPage() {
@@ -93,6 +94,10 @@ export default function EditorPage() {
           onChange={handleChange}
           autoFocus
         />
+      </div>
+      {/* שורת תיוג דיסקרטית בתחתית — תיוג אחרי הכתיבה, לא לפני. */}
+      <div className="border-t border-paper-200 px-4 py-2">
+        <TagEditor fragment={fragment} />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import LibraryPage from './features/library/LibraryPage';
 import EditorPage from './features/editor/EditorPage';
+import SettingsPage from './features/settings/SettingsPage';
 import Fab from './components/Fab';
 import { createFragment } from './db/fragments';
 import { ensureSettings } from './db/settings';
@@ -13,6 +14,7 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const isEditor = location.pathname.startsWith('/f/');
+  const hideFab = isEditor || location.pathname.startsWith('/settings');
 
   // יצירת שורת ההגדרות פעם אחת (מחוץ ל-liveQuery).
   useEffect(() => {
@@ -53,10 +55,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LibraryPage />} />
           <Route path="/f/:id" element={<EditorPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<LibraryPage />} />
         </Routes>
       </div>
-      {!isEditor && <Fab />}
+      {!hideFab && <Fab />}
     </div>
   );
 }
