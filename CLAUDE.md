@@ -60,6 +60,18 @@
 - **אין לכתוב בתוך `useLiveQuery`** — זו טרנזקציית קריאה-בלבד (ReadOnlyError).
   קריאות בלבד ב-liveQuery; כתיבות נעשות ב-effects/handlers.
 
+## סנכרון (Google Drive — `src/sync/`)
+- opt-in לחלוטין. בלי חיבור, האפליקציה עובדת במלואה. אין backend, אין סוד לקוח.
+- אימות דרך Google Identity Services בצד הלקוח, scope `drive.file` בלבד.
+- **מקור האמת למיזוג הוא `fragments-data.json`** בתיקייה "רסיסים" ב-Drive.
+  קובצי ה-md (`fragments/`, `collections/`) הם גיבוי קריא לאדם, כתיבה בלבד —
+  לא קוראים אותם חזרה למיזוג.
+- **מיזוג תלת-כיווני** (`merge.ts`, טהור ונבדק) עם מפת בסיס (`BaseMap`) של
+  updatedAt מהסנכרון האחרון. קונפליקט אמיתי (שני צדדים שינו מאז הבסיס ותוכן
+  שונה) → הגרסה החדשה נשמרת ונוצר **עותק** מהשנייה. לעולם לא דורסים.
+- המיזוג דטרמיניסטי (updatedAt ואז deviceId) ולכן מתכנס בין מספר מכשירים.
+- מזהה הלקוח מגיע מ-`VITE_GOOGLE_CLIENT_ID` בלבד, לא hardcoded.
+
 ## סטאק
 React + TypeScript + Vite · Dexie (IndexedDB) · Tailwind · vite-plugin-pwa.
 בלי router כבד או UI kit. `@/` = `src/`.

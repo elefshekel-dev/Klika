@@ -8,6 +8,7 @@ import FragmentCard from '@/components/FragmentCard';
 import TagEditor from '@/components/TagEditor';
 import TagChip from '@/components/TagChip';
 import { IconSettings, IconLayers } from '@/components/icons';
+import SyncIndicator from '@/components/SyncIndicator';
 import AddToCollectionSheet from '@/features/collections/AddToCollectionSheet';
 import EmptyState from './EmptyState';
 import SearchBar from './SearchBar';
@@ -48,6 +49,7 @@ export default function LibraryPage() {
         <div className="flex items-center justify-between">
           <h1 className="font-reading text-2xl text-ink-900">רסיסים</h1>
           <div className="flex items-center gap-1">
+            <SyncIndicator />
             <button
               onClick={() => navigate('/collections')}
               aria-label="אסופות"

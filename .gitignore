@@ -15,3 +15,4 @@ scripts/dbgerr.mjs
 scripts/dbinspect.mjs
 scripts/smoke3.mjs
 scripts/smoke4.mjs
+scripts/merge.test.mjs

@@ -3,6 +3,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { updateSettings } from '@/db/settings';
 import { IconArrowRight } from '@/components/icons';
 import TagManager from './TagManager';
+import SyncSection from './SyncSection';
 
 /** מסך הגדרות: טיפוגרפיה של העורך וניהול תגיות. */
 export default function SettingsPage() {
@@ -84,6 +85,8 @@ export default function SettingsPage() {
             />
           </label>
         </section>
+
+        <SyncSection />
 
         <TagManager />
       </div>

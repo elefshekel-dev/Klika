@@ -10,6 +10,7 @@ import Fab from './components/Fab';
 import { createFragment } from './db/fragments';
 import { ensureSettings } from './db/settings';
 import { useViewportHeight } from './hooks/useViewportHeight';
+import { sync } from './sync/driveSync';
 import { db } from './db/db';
 
 const FIRST_RUN_KEY = 'resisim.launched';
@@ -27,9 +28,12 @@ export default function App() {
   // גובה חלון תצוגה דינמי — כדי שהמקלדת בנייד לא תחתוך את העורך.
   useViewportHeight();
 
-  // יצירת שורת ההגדרות פעם אחת (מחוץ ל-liveQuery).
+  // יצירת שורת ההגדרות פעם אחת (מחוץ ל-liveQuery), והפעלת סנכרון אוטומטי
+  // אם המשתמשת כבר חיברה את Drive.
   useEffect(() => {
     void ensureSettings();
+    sync.startAuto();
+    return () => sync.stopAuto();
   }, []);
 
   // כניסה ראשונה אי-פעם: פותחים ישר עורך עם הסמן בפנים (בלי onboarding).
