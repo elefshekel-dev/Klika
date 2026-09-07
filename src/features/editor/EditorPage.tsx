@@ -9,6 +9,7 @@ import {
 } from '@/db/fragments';
 import { useDebouncedCallback } from '@/hooks/useDebouncedCallback';
 import { useSettings } from '@/hooks/useSettings';
+import { useSwipe } from '@/hooks/useSwipe';
 import EditorSurface from './EditorSurface';
 import EditorTopBar from './EditorTopBar';
 import TagEditor from '@/components/TagEditor';
@@ -66,6 +67,17 @@ export default function EditorPage() {
     navigate('/');
   }, [id, navigate, save]);
 
+  // ניווט לפי סדר התצוגה (מחושב גם כשהרסיס עדיין נטען — הוקים לפני return).
+  const idx = fragment ? order.indexOf(fragment.id) : -1;
+  const prevId = idx > 0 ? order[idx - 1] : undefined;
+  const nextId = idx >= 0 && idx < order.length - 1 ? order[idx + 1] : undefined;
+
+  // החלקה אופקית לניווט בין רסיסים: שמאלה=הבא, ימינה=הקודם.
+  const swipe = useSwipe({
+    onSwipeLeft: nextId ? () => goTo(nextId) : undefined,
+    onSwipeRight: prevId ? () => goTo(prevId) : undefined,
+  });
+
   if (!fragment) {
     // עדיין נטען, או שהרסיס לא קיים (למשל נמחק בשקט).
     return (
@@ -75,10 +87,6 @@ export default function EditorPage() {
     );
   }
 
-  const idx = order.indexOf(fragment.id);
-  const prevId = idx > 0 ? order[idx - 1] : undefined;
-  const nextId = idx >= 0 && idx < order.length - 1 ? order[idx + 1] : undefined;
-
   return (
     <div className="flex h-full flex-col bg-paper-50">
       <EditorTopBar
@@ -86,7 +94,7 @@ export default function EditorPage() {
         onPrev={prevId ? () => goTo(prevId) : undefined}
         onNext={nextId ? () => goTo(nextId) : undefined}
       />
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1" {...swipe}>
         <EditorSurface
           key={fragment.id}
           fragment={fragment}

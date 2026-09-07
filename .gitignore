@@ -13,3 +13,4 @@ scripts/smoke2.mjs
 scripts/debug.mjs
 scripts/dbgerr.mjs
 scripts/dbinspect.mjs
+scripts/smoke3.mjs

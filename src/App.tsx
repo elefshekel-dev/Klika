@@ -6,6 +6,7 @@ import SettingsPage from './features/settings/SettingsPage';
 import Fab from './components/Fab';
 import { createFragment } from './db/fragments';
 import { ensureSettings } from './db/settings';
+import { useViewportHeight } from './hooks/useViewportHeight';
 import { db } from './db/db';
 
 const FIRST_RUN_KEY = 'resisim.launched';
@@ -15,6 +16,9 @@ export default function App() {
   const navigate = useNavigate();
   const isEditor = location.pathname.startsWith('/f/');
   const hideFab = isEditor || location.pathname.startsWith('/settings');
+
+  // גובה חלון תצוגה דינמי — כדי שהמקלדת בנייד לא תחתוך את העורך.
+  useViewportHeight();
 
   // יצירת שורת ההגדרות פעם אחת (מחוץ ל-liveQuery).
   useEffect(() => {
@@ -48,8 +52,8 @@ export default function App() {
 
   return (
     <div
-      className="relative mx-auto flex w-full max-w-4xl flex-col bg-paper-50"
-      style={{ height: '100dvh' }}
+      className="relative mx-auto flex w-full max-w-4xl flex-col overflow-hidden bg-paper-50"
+      style={{ height: 'var(--app-vh, 100dvh)' }}
     >
       <div className="min-h-0 flex-1">
         <Routes>
