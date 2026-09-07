@@ -1,4 +1,5 @@
-# בונה את רסיסים ומפרסם דמו חי ל-GitHub Pages (ענף gh-pages).
+# בונה את רסיסים ומפרסם דמו חי ל-GitHub Pages דרך הפריסה הרשמית של GitHub Actions.
+# מפעיל את Pages אוטומטית (enablement) ומפרסם — בלי צורך לגעת בהגדרות ידנית.
 # הכתובת שתתקבל: https://<user>.github.io/Klika/
 name: Deploy demo to GitHub Pages
 
@@ -8,15 +9,20 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write # דרוש כדי לדחוף לענף gh-pages
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: pages-deploy
-  cancel-in-progress: true
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,6 +33,12 @@ jobs:
 
       - run: npm ci
 
+      # מפעיל את Pages (build type = workflow) אם עוד לא מופעל, ומחזיר את נתיב הבסיס.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
       # בנייה עם נתיב בסיס תת-תיקייה כדי שהנכסים ייטענו תחת /Klika/.
       - run: npm run build
         env:
@@ -35,13 +47,11 @@ jobs:
       # נפילת SPA: כל נתיב לא-קיים יוגש כ-index.html (Pages לא עושה rewrite).
       - run: cp dist/index.html dist/404.html
 
-      # חותמת בנייה ייחודית — מבטיחה ש-gh-pages משתנה בכל ריצה, כך ש-GitHub
-      # תמיד בונה מחדש את האתר (בלי זה, פרסום עם תוכן זהה מדלג על הדחיפה).
-      - run: date -u +"%Y-%m-%dT%H:%M:%SZ" > dist/build-info.txt
-
-      - name: Deploy to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: gh-pages
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
