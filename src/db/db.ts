@@ -6,7 +6,7 @@
 // בצד השני של האפליקציה. הוסיפו גרסה חדשה, אל תערכו קיימת.
 
 import Dexie, { type Table } from 'dexie';
-import type { Fragment, Tag, Collection, Version, Settings } from './types';
+import type { Fragment, Tag, Collection, Version, Settings, Recording } from './types';
 
 export class ResisimDB extends Dexie {
   fragments!: Table<Fragment, string>;
@@ -14,6 +14,7 @@ export class ResisimDB extends Dexie {
   collections!: Table<Collection, string>;
   versions!: Table<Version, string>;
   settings!: Table<Settings, string>;
+  recordings!: Table<Recording, string>;
 
   constructor() {
     super('resisim');
@@ -33,8 +34,25 @@ export class ResisimDB extends Dexie {
       settings: 'id',
     });
 
-    // גרסאות עתידיות: הוסיפו כאן this.version(2).stores(...).upgrade(...)
-    // עם מיגרציה מפורשת. אל תיגעו בגרסה 1.
+    // גרסה 2 — הוספת טבלת הקלטות (פתקים קוליים). זו טבלה חדשה בלבד; אין נתונים
+    // קיימים להמיר, לכן ה-upgrade הוא no-op מפורש (מתועד לפי מדיניות המיגרציות).
+    // האודיו מקומי למכשיר ואינו מסתנכרן.
+    this.version(2)
+      .stores({
+        fragments: 'id, updatedAt, createdAt, *tagIds',
+        tags: 'id, name, useCount, createdAt',
+        collections: 'id, name, createdAt, updatedAt',
+        versions: 'id, fragmentId, savedAt, [fragmentId+savedAt]',
+        settings: 'id',
+        recordings: 'id, createdAt',
+      })
+      .upgrade(async () => {
+        // אין מיגרציית נתונים — הטבלה נוצרת ריקה. מוגדר במפורש כדי לעמוד בכלל
+        // "כל שינוי סכמה עובר דרך upgrade".
+      });
+
+    // גרסאות עתידיות: הוסיפו כאן this.version(3).stores(...).upgrade(...)
+    // עם מיגרציה מפורשת. אל תיגעו בגרסאות קיימות.
   }
 }
 

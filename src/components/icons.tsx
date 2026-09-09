@@ -166,6 +166,46 @@ export const IconDownload = ({ className, size }: P) =>
     className,
   );
 
+export const IconMic = ({ className, size }: P) =>
+  svg(
+    <>
+      <rect x="9" y="2" width="6" height="12" rx="3" />
+      <path d="M5 10a7 7 0 0 0 14 0" />
+      <line x1="12" y1="17" x2="12" y2="22" />
+      <line x1="8" y1="22" x2="16" y2="22" />
+    </>,
+    size,
+    className,
+  );
+
+export const IconPlay = ({ className, size }: P) =>
+  svg(<polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none" />, size, className);
+
+export const IconStop = ({ className, size }: P) =>
+  svg(<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none" />, size, className);
+
+export const IconPause = ({ className, size }: P) =>
+  svg(
+    <>
+      <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none" />
+      <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" stroke="none" />
+    </>,
+    size,
+    className,
+  );
+
+export const IconTrash = ({ className, size }: P) =>
+  svg(
+    <>
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </>,
+    size,
+    className,
+  );
+
 export const IconGrip = ({ className, size }: P) =>
   svg(
     <>

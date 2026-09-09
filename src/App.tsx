@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import LibraryPage from './features/library/LibraryPage';
 import EditorPage from './features/editor/EditorPage';
@@ -7,7 +7,8 @@ import MemoriesPage from './features/library/MemoriesPage';
 import CollectionsListPage from './features/collections/CollectionsListPage';
 import CollectionPage from './features/collections/CollectionPage';
 import ContinuousReadPage from './features/collections/ContinuousReadPage';
-import Fab from './components/Fab';
+import CaptureFabs from './components/CaptureFabs';
+import VoiceCapture from './features/capture/VoiceCapture';
 import { createFragment } from './db/fragments';
 import { ensureSettings } from './db/settings';
 import { useViewportHeight } from './hooks/useViewportHeight';
@@ -28,6 +29,9 @@ export default function App() {
 
   // גובה חלון תצוגה דינמי — כדי שהמקלדת בנייד לא תחתוך את העורך.
   useViewportHeight();
+
+  // שכבת לכידה קולית (overlay מעל הכל).
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   // יצירת שורת ההגדרות פעם אחת (מחוץ ל-liveQuery), והפעלת סנכרון אוטומטי
   // אם המשתמשת כבר חיברה את Drive.
@@ -79,7 +83,8 @@ export default function App() {
           <Route path="*" element={<LibraryPage />} />
         </Routes>
       </div>
-      {!hideFab && <Fab />}
+      {!hideFab && <CaptureFabs onVoice={() => setVoiceOpen(true)} />}
+      {voiceOpen && <VoiceCapture onClose={() => setVoiceOpen(false)} />}
     </div>
   );
 }

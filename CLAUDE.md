@@ -48,6 +48,9 @@
   updatedAt, isDeleted, deviceId`. ריבוי חברות (CollectionMembership) ממומש דרך
   `fragmentIds` — אותו רסיס יכול להיות בכמה אסופות. מחיקת אסופה לא מוחקת רסיסים.
 - **Version**: `id, fragmentId, content, savedAt, deviceId`. 30 אחרונים לרסיס.
+- **Recording**: `id (===fragmentId), blob, mimeType, durationMs, createdAt,
+  deviceId`. אודיו של פתק קולי. **מקומי למכשיר בלבד — לא מסתנכרן ולא מיוצא**
+  (רק התמלול, כלומר תוכן הרסיס, מסתנכרן). מונע ניפוח של `fragments-data.json`.
 - **Settings**: מקומי, לא מסונכרן.
 - כל ישות נושאת `updatedAt` ו-`deviceId`. **אין להכניס הנחות single-user קשיחות
   למודל** — הוא מוכן לריבוי מכשירים.
@@ -59,6 +62,16 @@
   מסננים אותם ב-JS (`src/db/queries.ts`), לא דרך `where`.
 - **אין לכתוב בתוך `useLiveQuery`** — זו טרנזקציית קריאה-בלבד (ReadOnlyError).
   קריאות בלבד ב-liveQuery; כתיבות נעשות ב-effects/handlers.
+
+## לכידה קולית (`src/features/capture/`, `src/lib/speech.ts`)
+- פתק קולי: מקליטים אודיו (MediaRecorder) ומתמללים חי בעברית דרך **Web Speech
+  API** של הדפדפן — **בלי backend ובלי מפתחות**. בסיום נוצר רסיס עם התמלול,
+  והאודיו נשמר מקומית (טבלת `recordings`).
+- התמלול **דורש רשת** וזמין בעיקר ב-Chrome (מחשב/אנדרואיד). אם לא נתמך — עדיין
+  מקליטים אודיו והמשתמשת יכולה להקליד. תמיד לבדוק תמיכה (`isSpeechSupported`)
+  ולהתנוון בחן.
+- פתק קולי בלי תמלול הוא עדיין תוכן — `deleteFragmentIfEmpty` לא מוחק רסיס
+  שיש לו הקלטה.
 
 ## סנכרון (Google Drive — `src/sync/`)
 - opt-in לחלוטין. בלי חיבור, האפליקציה עובדת במלואה. אין backend, אין סוד לקוח.

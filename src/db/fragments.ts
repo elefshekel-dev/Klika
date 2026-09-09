@@ -4,6 +4,7 @@ import { db } from './db';
 import type { Fragment } from './types';
 import { newId } from '@/lib/id';
 import { getDeviceId } from '@/lib/device';
+import { hasRecording } from './recordings';
 
 /** יוצר רסיס ריק חדש ומחזיר אותו. נקודת הכניסה של הלכידה. */
 export async function createFragment(): Promise<Fragment> {
@@ -53,6 +54,9 @@ export async function deleteFragmentIfEmpty(id: string): Promise<boolean> {
   const collections = await db.collections.toArray();
   const inCollection = collections.some((c) => !c.isDeleted && c.fragmentIds.includes(id));
   if (inCollection) return false;
+
+  // פתק קולי בלי תמלול הוא עדיין תוכן — לא מוחקים אם יש הקלטה.
+  if (await hasRecording(id)) return false;
 
   await db.fragments.delete(id);
   return true;

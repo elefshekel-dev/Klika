@@ -67,6 +67,23 @@ export interface Version {
   deviceId: string;
 }
 
+/**
+ * הקלטת אודיו של פתק קולי, מקושרת לרסיס לפי מזההו (id === fragmentId).
+ * נשמרת מקומית בלבד ואינה נכנסת לסנכרון/ייצוא — האודיו נשאר על המכשיר שהקליט,
+ * בעוד התמלול (התוכן של הרסיס) מסתנכרן כרגיל. אין backend.
+ */
+export interface Recording {
+  /** זהה למזהה הרסיס שאליו שייכת ההקלטה. */
+  id: ID;
+  /** נתוני האודיו הגולמיים. */
+  blob: Blob;
+  mimeType: string;
+  /** משך ההקלטה במילישניות (0 אם לא ידוע). */
+  durationMs: number;
+  createdAt: number;
+  deviceId: string;
+}
+
 /** הגדרות משתמש — נשמרות מקומית, לא מסונכרנות. */
 export interface Settings {
   id: 'singleton';

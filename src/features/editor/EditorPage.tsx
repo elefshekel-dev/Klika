@@ -14,6 +14,7 @@ import { useSwipe } from '@/hooks/useSwipe';
 import EditorSurface from './EditorSurface';
 import EditorTopBar from './EditorTopBar';
 import VersionsSheet from './VersionsSheet';
+import AudioPlayer from './AudioPlayer';
 import TagEditor from '@/components/TagEditor';
 import AddToCollectionSheet from '@/features/collections/AddToCollectionSheet';
 
@@ -139,6 +140,11 @@ export default function EditorPage() {
           autoFocus
         />
       </div>
+      {/* נגן פתק קולי — מוצג רק אם יש הקלטה לרסיס. */}
+      <div className="px-4">
+        <AudioPlayer fragmentId={fragment.id} />
+      </div>
+
       {/* שורת תיוג דיסקרטית בתחתית — תיוג אחרי הכתיבה, לא לפני. */}
       <div className="border-t border-paper-200 px-4 py-2">
         <TagEditor fragment={fragment} />
